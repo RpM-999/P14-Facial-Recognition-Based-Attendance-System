@@ -32,12 +32,14 @@ def login():
                 st.session_state.logged_in = True
                 st.session_state.admin_email = message
                 st.success(f"✅ Login successful! Welcome")
+                go_to("Admin_option" )
                 st.rerun()
             else:
                 st.warning(f"❌ {message}")         
                 
         if home_button:
-            go_to("Home")           
+            go_to("Home")
+            st.rerun()          
 '''
         if login_button:
             if admin_verification(email, password):

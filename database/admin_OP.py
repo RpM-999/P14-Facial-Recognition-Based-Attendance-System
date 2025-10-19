@@ -1,9 +1,6 @@
 import streamlit as st
-from supabase import create_client
-from gotrue.errors import AuthApiError
-
 from supabase import Client
-import streamlit as st
+from gotrue.errors import AuthApiError
 
 def admin_verification(email: str, password: str, supabase: Client):
     try:
@@ -14,9 +11,14 @@ def admin_verification(email: str, password: str, supabase: Client):
 
         user = auth_res.user
         if not user:
-            return False, "❌ Invalid email or password"
+            return False, "Invalid email or password"
         
-        return True, f"✅ Logged in as {user.email}"
+        # --- MODIFICATION ---
+        # Return the actual email, not a success message
+        return True, user.email 
 
+    except AuthApiError as e:
+        # Give a clearer error message from Supabase
+        return False, f"⚠️ {e.message}"
     except Exception as e:
-        return False, f"⚠️ Login failed: {e}"
+        return False, f"⚠️ An unexpected error occurred: {e}"

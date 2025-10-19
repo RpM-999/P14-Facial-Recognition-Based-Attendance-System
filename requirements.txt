@@ -4,5 +4,8 @@ streamlit
 facenet-pytorch
 torch
 mysql-connector-python
-
-
+supabase
+pillow
+gotrue
+qdrant-client
+httpx[http2]    

@@ -2,12 +2,16 @@ import streamlit as st
 # Import all your page modules
 from fun import Home, Admin_login, Admin_option, Add_new_department
 
-# --- Session State Initialization ---
-# Initialize the current_page if it doesn't exist
+# --------------------- Session State Initialization ---
+# -------------Initialize the current_page if it doesn't exist
+
+
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
 
 # Initialize the logged_in status if it doesn't exist
+
+
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
