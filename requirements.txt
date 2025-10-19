@@ -1,0 +1,8 @@
+
+
+streamlit
+facenet-pytorch
+torch
+mysql-connector-python
+
+

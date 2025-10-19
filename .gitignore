@@ -1,0 +1,122 @@
+# .gitignore for P14-Face_Recognition_System
+# See https://www.gitignore.io/ for more templates
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Virtual environments
+venv/
+ENV/
+env/
+venv.bak/
+venv2/
+env2/
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+*.iml
+
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Secrets and keys (do NOT commit)
+secrets.tomal
+*.streamlit
+*.pem
+*.key
+*.crt
+id_rsa
+id_rsa.pub
+id_ecdsa
+id_ecdsa.pub
+id_ed25519
+id_ed25519.pub
+
+# Environment files
+.env
+.env.*
+env.local
+venv.local
+
+# Misc
+*.bak
+*.swp
+*~
+
+# IDE/workspace files
+*.sublime-workspace
+*.sublime-project
+
+# PEP 582 ; local packages
+__pypackages__/
+
+# Temporary files
+tmp/
+temp/
+
+# Windows Python wheel
+*.whl
+
+# If you keep large datasets, models or media in repo root folders
+/data/
+/models/
+/media/
+
+# End of file
+
