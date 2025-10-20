@@ -1,15 +1,22 @@
 import streamlit as st
 from utils.navigation import go_to
 from database.admin_OP import admin_verification 
-from supabase import create_client ,Client
+#rom supabase import create_client ,Client
+from database.connection import supabase
 
+#url = st.secrets["supabase"]["url"]
+#anon_key = st.secrets["supabase"]["anon_key"]
 
-url = st.secrets["supabase"]["url"]
-anon_key = st.secrets["supabase"]["anon_key"]
-
-supabase :Client = create_client(url, anon_key)
+#supabase :Client = create_client(url, anon_key)
 
 def login():
+    
+    
+    if st.session_state.get("logged_in", False):
+        # If already logged in, just go to the admin page and stop
+        go_to("Admin_option")
+        st.rerun()
+        return
     
     st.title("🔐 Admin Panel")
     
@@ -40,16 +47,7 @@ def login():
         if home_button:
             go_to("Home")
             st.rerun()          
-'''
-        if login_button:
-            if admin_verification(email, password):
-                st.session_state.logged_in = True
-                st.session_state.admin_email = email
-                # On successful login, go to the admin options page
-                go_to("Admin_option")
-            else:
-                st.warning("❌ Invalid name or password")
-  '''      
+    
    
 
 

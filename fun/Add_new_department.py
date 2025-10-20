@@ -17,7 +17,7 @@ def Add_new_department():
     with st.form("add_department_form", clear_on_submit=True):
         st.subheader("Department Details")
         
-        d_id = st.number_input("Department ID", min_value=1, step=1, help="Enter a unique numerical ID for the department.")
+        d_id = st.text_input("Department ID", placeholder="e.g. cse-101")
 
         d_name = st.text_input("Department Name", placeholder="e.g., Computer Science")
 
@@ -35,12 +35,7 @@ def Add_new_department():
             else:
                 try:
                     
-                    add_department(
-                        d_id=d_id,
-                        d_name=d_name,
-                        d_hod_name=d_hod_name,
-                        d_hod_email=d_hod_email
-                    )
+                    add_department( dep_id=d_id ,dep_name=d_name,dep_hod=d_hod_name,dep_hod_mail=d_hod_email)
                     st.success(f"✅ Successfully added department: {d_name}")
                     
                 except Exception as e:

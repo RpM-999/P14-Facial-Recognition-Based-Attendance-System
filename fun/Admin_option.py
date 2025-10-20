@@ -40,7 +40,7 @@ def admin_options():
             go_to("Add_new_department")
 
         if st.button("Update Department Info", use_container_width=True):
-            go_to("update_department_info")
+            go_to("Update_department_info")
             
         # --- Admin Management ---
         st.subheader("System Administration")

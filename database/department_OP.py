@@ -1,32 +1,41 @@
-import mysql.connector
-from database.connection import get_db_connection
+from database.connection import supabase
+import streamlit as st
 
 
-def add_department(d_id , d_name , d_hod_name, d_hod_email):
+def add_department(dep_id , dep_name , dep_hod, dep_hod_mail):
     try:
-       
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        data = {
+            "dep_id": dep_id,
+            "dep_name": dep_name,
+            "dep_hod": dep_hod,
+            "dep_hod_mail": dep_hod_mail
+        }
+        supabase.table("department").insert(data).execute()
         
+    except Exception as e:
+        raise e
     
-        query = """
-        INSERT INTO department (d_id, d_name, d_hod_name, d_hod_email) 
-        VALUES (%s, %s, %s, %s)
-        """
-      
-        args = (d_id, d_name, d_hod_name, d_hod_email)
+def get_all_departments():
+    """Fetches all departments from the database."""
+    try:
+        response = supabase.table("department").select("*").order("dep_name").execute()
+        return response.data
+    except Exception as e:
+        st.error(f"Error fetching departments: {e}")
+        return []
+    
+def update_department(dep_id, dep_name ,dep_hod,dep_hod_mail):
+    """
+    Updates a specific department in the database using its dep_id.
+    """
+    try:
         
-        cursor.execute(query, args)
-     
-        conn.commit()
+        new_data = {
+            "dep_name": dep_name,
+            "dep_hod": dep_hod,
+            "dep_hod_mail": dep_hod_mail
+        }
+        supabase.table("department").update(new_data).eq("dep_id", dep_id).execute()
         
-    except mysql.connector.Error as err:
-        # If an error occurs (e.g., duplicate d_id), re-raise the exception
-        # so the Streamlit page can catch it and display a user-friendly error.
-        raise Exception(f"Database error: {err}")
-        
-    finally:
-        # Ensure the connection is always closed, even if an error occurs
-        if 'conn' in locals() and conn.is_connected():
-            cursor.close()
-            conn.close()
+    except Exception as e:
+        raise e
