@@ -1,97 +1,79 @@
-from .connection_OP import get_db_connection
-import mysql.connector
+
+
 import datetime
-
-'''
-            ------------> select all the student info
-
-'''
-
-def get_all_students():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM students")
-    students = cursor.fetchall()
-    conn.close()
-    return students
+import json
+import uuid
+from BACKEND.RDB_connection_OP import supabase
+from BACKEND.VDB_connection_OP import qdrant_client, QDRANT_COLLECTION_NAME
+from qdrant_client.http.models import PointStruct
 
 
 
-'''
-            ------------> add a new student
 
-'''
-
-'''
-            -------------> 120A-2025-0001
-'''
-
-def generate_roll_number(conn, join_year, university_code="120A"):
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT COUNT(*) FROM students WHERE join_year = %s", (join_year,))
-    count = cursor.fetchone()[0] + 1  
-
-    roll_number = f"{university_code}-{join_year}-{count:04d}"
-    return roll_number
-
-def get_departments(department_name):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT d_id FROM departments WHERE d_name = %s", (department_name,))
-    result = cursor.fetchone()
-    conn.close()
-
-    if result:
-        return result[0]
-    else:
-        None
-
-
-def insert_student(name, email, department, year, face_encoding, photo_path):
-    conn = get_db_connection()
-    cursor = conn.cursor()
+def process_and_upload_students(student_records: list):
+    
     try:
+        
+        today_str = datetime.datetime.now().strftime("%y%m%d")
+        
+        # 2. Check Supabase for the last ID used today
+        response = supabase.table("students").select("student_id") \
+                             .like("student_id", f"{today_str}-%") \
+                             .order("student_id", desc=True) \
+                             .limit(1).execute()
 
-        join_year = datetime.now().year
-        roll_number = generate_roll_number(conn, join_year)
+        start_index = 0
+        if response.data:
+            last_id = response.data[0]['student_id']
+            last_index_str = last_id.split('-')[1]
+            start_index = int(last_index_str) + 1
 
+        supabase_batch_payload = []
+        qdrant_points_payload = []
+        current_index = start_index
+        
+        for record in student_records:
+        
+            new_student_id = f"{today_str}-{str(current_index).zfill(4)}"
+            current_index += 1
+            
+            
+            face_embeddings_json = record.pop("S_live_face_photos")
+            face_embeddings_list = json.loads(face_embeddings_json)
+            
+            # 5. Prepare Supabase payload (the *rest* of the record)
+            record['student_id'] = new_student_id  # Add the new ID
+            supabase_batch_payload.append(record)
+            
+            # 6. Prepare Qdrant payload (one point for each embedding)
+            for i, embedding in enumerate(face_embeddings_list):
+                # We need a unique ID for each vector point
+                point_id = str(uuid.uuid4())
+                
+                qdrant_points_payload.append(
+                    PointStruct(
+                        id=point_id,
+                        vector=embedding,
+                        payload={
+                            "student_id": new_student_id, # Link back to the student
+                            "image_index": i # e.g., 0=front, 1=left, 2=right
+                        }
+                    )
+                )
+        
+        # 7. Execute batch uploads
+        if supabase_batch_payload:
+            supabase.table("students").insert(supabase_batch_payload).execute()
+        
+        if qdrant_points_payload:
+            qdrant_client.upsert(
+                collection_name=QDRANT_COLLECTION_NAME,
+                points=qdrant_points_payload,
+                wait=True # Wait for the operation to complete
+            )
+        
+        # Return the number of students processed
+        return len(supabase_batch_payload)
 
-
-        cursor.execute(
-            """
-            INSERT INTO students 
-            (roll_number, student_name, email, department, year, join_year, face_encoding, photo_path) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """,
-            (roll_number, name, email, department, year, join_year, face_encoding, photo_path)
-        )
-        conn.commit()
-        return roll_number  ,join_year
-    except mysql.connector.Error as err:
-        print("MySQL Error:", err)
-        raise
-    finally:
-        conn.close()
-'''
-def insert_student(name, roll, email, class_name, face_encoding, photo_path):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            "INSERT INTO students (name, roll_number, email, `class`, face_encoding, photo_path) VALUES (%s, %s, %s, %s, %s, %s)",
-            (name, roll, email, class_name, face_encoding, photo_path)
-        )
-        conn.commit()
-    except mysql.connector.Error as err:
-        print("MySQL Error:", err)
-        raise
-    finally:
-        conn.close()
-
-'''
-
-'''
-            ------------> remove student
-
-'''
+    except Exception as e:
+        raise e

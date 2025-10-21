@@ -1,4 +1,4 @@
-from database.connection import supabase
+from BACKEND.connection_OP import supabase
 import streamlit as st
 
 

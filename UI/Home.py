@@ -1,5 +1,5 @@
 import streamlit as st
-from utils.navigation import go_to
+from UTILS.navigation import go_to
 
 def show():
     st.title("🏫 Welcome to Attendance System")
