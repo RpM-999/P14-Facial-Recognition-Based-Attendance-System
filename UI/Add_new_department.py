@@ -1,9 +1,9 @@
 import streamlit as st
-from utils.navigation import go_to
+from UTILS.navigation import go_to
 
-from database.department_OP import add_department
+from BACKEND.department_OP import add_department
 
-def Add_new_department():
+def Add_new_department_page():
 
 
     if not st.session_state.get("logged_in"):

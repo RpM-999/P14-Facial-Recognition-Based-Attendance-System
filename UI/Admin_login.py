@@ -1,15 +1,10 @@
 import streamlit as st
-from utils.navigation import go_to
-from database.admin_OP import admin_verification 
-#rom supabase import create_client ,Client
-from database.connection import supabase
+from UTILS.navigation import go_to
+from BACKEND.admin_OP import admin_verification 
+from BACKEND.connection_OP import supabase
 
-#url = st.secrets["supabase"]["url"]
-#anon_key = st.secrets["supabase"]["anon_key"]
 
-#supabase :Client = create_client(url, anon_key)
-
-def login():
+def login_page():
     
     
     if st.session_state.get("logged_in", False):

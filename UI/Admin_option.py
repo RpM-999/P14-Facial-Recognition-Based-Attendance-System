@@ -1,12 +1,9 @@
 import streamlit as st
-from utils.navigation import go_to
+from UTILS.navigation import go_to
 
 
-def admin_options():
-    """
-    This page displays the main admin options in a sidebar menu.
-    The main content area will show the selected page or a welcome message.
-    """
+def admin_options_page():
+   
     
     # --- Security Check --- Ensure the user is logged in to see this page
     if not st.session_state.get("logged_in"):
@@ -42,7 +39,7 @@ def admin_options():
         if st.button("Update Department Info", use_container_width=True):
             go_to("Update_department_info")
             
-        # --- Admin Management ---
+        # ------------------- Admin Management ---
         st.subheader("System Administration")
         if st.button("Add New Admin", use_container_width=True):
             go_to("add_admin")

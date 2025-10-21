@@ -1,6 +1,6 @@
 import streamlit as st
 # Import all your page modules
-from fun import Home, Admin_login, Admin_option, Add_new_department ,Update_department_info
+from UI import Home, Admin_login, Admin_option, Add_new_department ,Update_department_info
 
 # --------------------- Session State Initialization ---
 # -------------Initialize the current_page if it doesn't exist
@@ -23,33 +23,31 @@ if page == "Home":
 
 elif page == "Admin_login":
     # Using the .login() function as specified
-    Admin_login.login() 
+    Admin_login.login_page() 
 
 elif page == "Admin_option":
-    # This block handles the security check before showing the admin options
     if st.session_state.logged_in:
-        Admin_option.admin_options()
+        Admin_option.admin_options_page()
     else:
         st.warning("🔒 Please log in to access the Admin Panel.")
-        # If not logged in, show the login page instead
-        Admin_login.login()
+        Admin_login.login_page()
 
 elif page == "Add_new_department":
     
     if st.session_state.logged_in:
-        Add_new_department.Add_new_department()
+        Add_new_department.Add_new_department_page()
     else:
         st.warning("🔒 Please log in to access this page.")
-        Admin_login.login()
+        Admin_login.login_page()
         
         
         
 elif page == "Update_department_info":
     if st.session_state.logged_in:
-       Update_department_info.update_department_info()
+       Update_department_info.update_department_info_page()
     else:
         st.warning("🔒 Please log in to access this page.")
-        Admin_login.login()
+        Admin_login.login_page()
         
 
 # --- Add other pages below using the same pattern ---

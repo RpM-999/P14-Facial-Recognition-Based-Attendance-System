@@ -1,10 +1,10 @@
 
 
 import streamlit as st
-from utils.navigation import go_to
-from database.department_OP import get_all_departments, update_department
+from UTILS.navigation import go_to
+from BACKEND.department_OP import get_all_departments, update_department
 
-def update_department_info():
+def update_department_info_page():
 
     if not st.session_state.get("logged_in"):
         st.warning("You must be logged in to view this page.")
