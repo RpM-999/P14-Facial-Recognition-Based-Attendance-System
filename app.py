@@ -1,7 +1,7 @@
 import streamlit as st
 # Import all your page modules
-from UI import Home, Admin_login, Admin_option, Add_new_department ,Update_department_info
-
+from UI import Home, Admin_login, Admin_option, Add_new_department ,Update_department_info 
+from UI import Add_new_student
 # --------------------- Session State Initialization ---
 # -------------Initialize the current_page if it doesn't exist
 
@@ -49,6 +49,12 @@ elif page == "Update_department_info":
         st.warning("🔒 Please log in to access this page.")
         Admin_login.login_page()
         
+elif page == "Add_new_student":
+    if st.session_state.logged_in:
+       Add_new_student.add_new_students()
+    else:
+        st.warning("🔒 Please log in to access this page.")
+        Admin_login.login_page()
 
 # --- Add other pages below using the same pattern ---
 # Example for a future student page:

@@ -17,7 +17,7 @@ except Exception as e:
     st.stop()
 
 
-def show():
+def add_new_students():
     
     if not st.session_state.get("logged_in"):
         st.warning("You must be logged in to view this page.")
@@ -34,7 +34,10 @@ def show():
     if col1.button("🟢 Open Registration Form", width='stretch'):
         try:
             
-            supabase.table("app_controls").update({"is_registration_open": True}).eq("id", 1).execute()
+            supabase.table("app_controls") \
+                    .update({"is_registration_open": True}) \
+                    .eq("is_registration_open", False) \
+                    .execute()
             st.success("Registration Form is now LIVE.")
             st.info(f"Share this URL with students: {REGISTRATION_FORM_URL}")
         except Exception as e:
@@ -43,7 +46,10 @@ def show():
     if col2.button("🔴 Close Registration Form", width='stretch'):
         try:
             
-            supabase.table("app_controls").update({"is_registration_open": False}).eq("id", 1).execute()
+            supabase.table("app_controls") \
+                    .update({"is_registration_open": False}) \
+                    .eq("is_registration_open", True) \
+                    .execute()
             st.warning("Registration Form is now CLOSED.")
         except Exception as e:
             st.error(f"Failed to close form: {e}")
@@ -52,7 +58,7 @@ def show():
     st.header("Data Upload")
     st.write("Pull student data from the temporary sheet and save it to the main database.")
     
-    if st.button("Upload New Students to Database", width='stretch', type="primary"):
+    if st.button("Upload New Students to Database", width='stretch'):
         if sheet is None:
             st.error("Cannot connect to Google Sheet.")
             st.stop()

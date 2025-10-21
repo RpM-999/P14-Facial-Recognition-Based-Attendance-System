@@ -22,10 +22,13 @@ def admin_options_page():
         
         # --- Student Management ---
         st.subheader("Student Management")
+        
         if st.button("Register Student", use_container_width=True):
-            go_to("add_new_student") 
+            go_to("Add_new_student") 
+            
         if st.button("Remove Student", use_container_width=True):
             go_to("remove_student")
+            
         if st.button("Update Student Info", use_container_width=True):
             go_to("update_student_info")
         

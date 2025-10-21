@@ -1,7 +1,7 @@
 import streamlit as st
 from UTILS.navigation import go_to
 from BACKEND.admin_OP import admin_verification 
-from BACKEND.connection_OP import supabase
+from BACKEND.RDB_connection_OP import supabase
 
 
 def login_page():

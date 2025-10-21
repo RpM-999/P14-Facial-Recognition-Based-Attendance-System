@@ -17,14 +17,14 @@ def process_and_upload_students(student_records: list):
         today_str = datetime.datetime.now().strftime("%y%m%d")
         
         # 2. Check Supabase for the last ID used today
-        response = supabase.table("students").select("student_id") \
-                             .like("student_id", f"{today_str}-%") \
-                             .order("student_id", desc=True) \
+        response = supabase.table("students").select("S_id") \
+                             .like("S_id", f"{today_str}-%") \
+                             .order("S_id", desc=True) \
                              .limit(1).execute()
 
         start_index = 0
         if response.data:
-            last_id = response.data[0]['student_id']
+            last_id = response.data[0]['S_id']
             last_index_str = last_id.split('-')[1]
             start_index = int(last_index_str) + 1
 
@@ -44,7 +44,7 @@ def process_and_upload_students(student_records: list):
             # 5. Prepare Supabase payload (the *rest* of the record)
             
             
-            record['student_id'] = new_student_id  # Add the new ID
+            record['S_id'] = new_student_id  # Add the new ID
             supabase_batch_payload.append(record)
             
             
@@ -61,7 +61,7 @@ def process_and_upload_students(student_records: list):
                         id=point_id,
                         vector=embedding,
                         payload={
-                            "student_id": new_student_id, # Link back to the student
+                            "S_id": new_student_id, # Link back to the student
                             "image_index": i # e.g., 0=front, 1=left, 2=right
                         }
                     )
