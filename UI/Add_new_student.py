@@ -1,8 +1,8 @@
-# In fun/Add_new_student.py
+
 
 import streamlit as st
 from UTILS.navigation import go_to
-from BACKEND.connection_OP import supabase
+from BACKEND.RDB_connection_OP import supabase
 from UTILS.g_spread import connect_to_gsheet, read_from_sheet, clear_sheet
 import json
 import datetime

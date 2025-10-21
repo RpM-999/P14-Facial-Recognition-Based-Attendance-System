@@ -39,3 +39,36 @@ def write_to_sheet(sheet, data_row: dict):
         return True, "✅ Data saved to sheet successfully."
     except Exception as e:
         return False, f"⚠️ Error writing to sheet: {e}"
+    
+def read_from_sheet(sheet):
+    """
+    Reads all data from the sheet (except the header row)
+    and returns it as a list of dictionaries.
+    """
+    try:
+        # get_all_records() is a powerful gspread function that
+        # automatically uses row 1 as keys for the dictionaries.
+        data = sheet.get_all_records()
+        return data
+    except Exception as e:
+        st.error(f"⚠️ Error reading from sheet: {e}")
+        # Return an empty list on failure
+        return []
+
+def clear_sheet(sheet):
+    """
+    Clears all data from the sheet *except* for the header row (Row 1).
+    """
+    try:
+        # Get the total number of rows in the sheet
+        row_count = sheet.row_count
+        
+        # If there's more than just the header row, delete the rest
+        if row_count > 1:
+            # delete_rows() will remove all rows from row 2 to the end
+            sheet.delete_rows(2, row_count)
+            
+        return True
+    except Exception as e:
+        st.error(f"⚠️ Error clearing sheet: {e}")
+        return False

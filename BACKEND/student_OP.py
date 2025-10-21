@@ -42,10 +42,16 @@ def process_and_upload_students(student_records: list):
             face_embeddings_list = json.loads(face_embeddings_json)
             
             # 5. Prepare Supabase payload (the *rest* of the record)
+            
+            
             record['student_id'] = new_student_id  # Add the new ID
             supabase_batch_payload.append(record)
             
+            
+            
             # 6. Prepare Qdrant payload (one point for each embedding)
+            
+            
             for i, embedding in enumerate(face_embeddings_list):
                 # We need a unique ID for each vector point
                 point_id = str(uuid.uuid4())
@@ -62,6 +68,8 @@ def process_and_upload_students(student_records: list):
                 )
         
         # 7. Execute batch uploads
+        
+        
         if supabase_batch_payload:
             supabase.table("students").insert(supabase_batch_payload).execute()
         
