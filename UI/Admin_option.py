@@ -20,7 +20,12 @@ def admin_options_page():
         st.title(f"Welcome, {admin_name}")
         st.header("Admin Menu")
         
-        # --- Student Management ---
+        
+        
+# ------------------------------- Student Management ----------------------------------
+
+
+
         st.subheader("Student Management")
         
         if st.button("Register Student", use_container_width=True):
@@ -30,9 +35,12 @@ def admin_options_page():
             go_to("remove_student")
             
         if st.button("Update Student Info", use_container_width=True):
-            go_to("update_student_info")
+            go_to("Update_student_info")
         
-        # --- Department Management ---fun\.py
+        
+# ----------------------------- Department Management -------------------------------------
+
+
         st.subheader("Department Management")
 
         if st.button("Add Department", use_container_width=True):
@@ -42,7 +50,11 @@ def admin_options_page():
         if st.button("Update Department Info", use_container_width=True):
             go_to("Update_department_info")
             
-        # ------------------- Admin Management ---
+            
+# -------------------------- Admin Management ---------------------------------------------
+
+
+
         st.subheader("System Administration")
         if st.button("Add New Admin", use_container_width=True):
             go_to("add_admin")
@@ -63,7 +75,9 @@ def admin_options_page():
     st.title("Admin Dashboard")
     st.info("Select an option from the sidebar to get started.")
     # Corrected the parameter from use_column_width to use_container_width
-    st.image("https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop", 
-             caption="Welcome to the Admin Control Panel",
-             use_container_width=True)
+    st.image(
+        "IMAGES/img.png",
+        caption="Welcome to the Admin Control Panel",
+        width='stretch'  # Icons often look better with a fixed width
+    )
 

@@ -10,6 +10,18 @@ from BACKEND.student_OP import process_and_upload_students
 
 REGISTRATION_FORM_URL = "https://your-student-form-app.streamlit.app" 
 
+st.markdown("""
+    <style>
+    .stKey-my_red_button > button {
+        color: red !important;
+    }
+    .stKey-my_green_button > button {
+        color: green !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
 try:
     sheet = connect_to_gsheet()
 except Exception as e:
@@ -31,7 +43,7 @@ def add_new_students():
     st.write("Control the live student registration form.")
     
     col1, col2 = st.columns(2)
-    if col1.button("🟢 Open Registration Form", width='stretch'):
+    if col1.button("🟩 Open Registration Form 🟩",width='stretch'):
         try:
             
             supabase.table("app_controls") \
@@ -43,7 +55,7 @@ def add_new_students():
         except Exception as e:
             st.error(f"Failed to open form: {e}")
 
-    if col2.button("🔴 Close Registration Form", width='stretch'):
+    if col2.button("🟥 Close Registration Form 🟥", width='stretch'):
         try:
             
             supabase.table("app_controls") \
@@ -86,6 +98,6 @@ def add_new_students():
     
 
     st.markdown("---")
-    if st.button("⬅️ Back to Admin Menu"):
+    if st.button("🔙 Back to Admin Menu"):
         go_to("Admin_option")
         st.rerun()

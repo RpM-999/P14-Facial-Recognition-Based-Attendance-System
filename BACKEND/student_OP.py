@@ -5,7 +5,7 @@ import json
 import uuid
 from BACKEND.RDB_connection_OP import supabase
 from BACKEND.VDB_connection_OP import qdrant_client, QDRANT_COLLECTION_NAME
-from qdrant_client.http.models import PointStruct
+from qdrant_client.http.models import PointStruct, Filter, FieldCondition, MatchValue
 
 
 
@@ -65,10 +65,7 @@ def process_and_upload_students(student_records: list):
                             "image_index": i # e.g., 0=front, 1=left, 2=right
                         }
                     )
-                )
-        
-        # 7. Execute batch uploads
-        
+                )  
         
         if supabase_batch_payload:
             supabase.table("students").insert(supabase_batch_payload).execute()
@@ -79,9 +76,65 @@ def process_and_upload_students(student_records: list):
                 points=qdrant_points_payload,
                 wait=True # Wait for the operation to complete
             )
-        
-        # Return the number of students processed
+
         return len(supabase_batch_payload)
 
+    except Exception as e:
+        raise e
+    
+def get_student_by_id(S_id):
+    try:
+        response = supabase.table("students").select("*") \
+                           .eq("S_id", S_id).single().execute()
+        return response.data
+    except Exception as e:
+        print(f"Error getting student: {e}")
+        return None
+    
+def update_student_info(S_id, new_data):
+    try:
+        supabase.table("students").update(new_data) \
+                .eq("S_id", S_id).execute()
+    except Exception as e:
+        raise e 
+    
+
+def update_student_embeddings(S_id, new_embeddings_list):
+    
+    try:
+        qdrant_client.delete(
+            collection_name=QDRANT_COLLECTION_NAME,
+            points_selector=Filter(
+                must=[
+                    FieldCondition(
+                        key="S_id", 
+                        match=MatchValue(value=S_id)
+                    )
+                ]
+            )
+        )
+        
+        qdrant_points_payload = []
+        for i, embedding in enumerate(new_embeddings_list):
+            point_id = str(uuid.uuid4()) 
+            
+            qdrant_points_payload.append(
+                PointStruct(
+                    id=point_id,
+                    vector=embedding,
+                    payload={
+                        "S_id": S_id,
+                        "image_index": i
+                    }
+                )
+            )
+            
+        if qdrant_points_payload:
+            qdrant_client.upsert(
+                collection_name=QDRANT_COLLECTION_NAME,
+                points=qdrant_points_payload,
+                wait=True
+            )
+            
     except Exception as e:
         raise e
