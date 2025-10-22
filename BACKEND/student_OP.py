@@ -138,3 +138,25 @@ def update_student_embeddings(S_id, new_embeddings_list):
             
     except Exception as e:
         raise e
+    
+def delete_student(student_id: str):
+    try:
+        
+        qdrant_client.delete(
+            collection_name=QDRANT_COLLECTION_NAME,
+            points_selector=Filter(
+                must=[
+                    FieldCondition(
+                        key="S_id", # Match the payload key used during upload
+                        match=MatchValue(value=student_id)
+                    )
+                ]
+            )
+        )
+        
+    
+        supabase.table("students").delete().eq("S_id", student_id).execute()
+        
+    except Exception as e:
+        # Raise the error to be handled by the frontend
+        raise e

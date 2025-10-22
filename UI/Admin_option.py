@@ -32,7 +32,7 @@ def admin_options_page():
             go_to("Add_new_student") 
             
         if st.button("Remove Student", use_container_width=True):
-            go_to("remove_student")
+            go_to("Remove_student")
             
         if st.button("Update Student Info", use_container_width=True):
             go_to("Update_student_info")
