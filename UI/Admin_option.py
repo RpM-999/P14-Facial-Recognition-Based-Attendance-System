@@ -1,29 +1,28 @@
 import streamlit as st
 from UTILS.navigation import go_to
 
-
 def admin_options_page():
    
     
-    # --- Security Check --- Ensure the user is logged in to see this page
+    
     if not st.session_state.get("logged_in"):
         st.warning("You must be logged in to view this page.")
         if st.button("Go to Login"):
             go_to("Admin_login")
-        return # Stop execution if not logged in
+        return 
+    
+    
 
-    # Get the admin's name from session state to personalize the welcome message
     admin_name = st.session_state.get("admin_name", "Admin")
 
     # --- Sidebar Navigation Menu ---
     with st.sidebar:
-        st.title(f"Welcome, {admin_name}")
-        st.header("Admin Menu")
+        st.title(f"Welcome {admin_name}")
+        st.header("Admin Menu",)
         
         
         
 # ------------------------------- Student Management ----------------------------------
-
 
 
         st.subheader("Student Management")
@@ -36,10 +35,11 @@ def admin_options_page():
             
         if st.button("Update Student Info", use_container_width=True):
             go_to("Update_student_info")
+            
+        st.divider()
         
         
 # ----------------------------- Department Management -------------------------------------
-
 
         st.subheader("Department Management")
 
@@ -50,9 +50,21 @@ def admin_options_page():
         if st.button("Update Department Info", use_container_width=True):
             go_to("Update_department_info")
             
+        st.divider()
+            
+    
+        st.subheader("Attendence Management")
+    
+        if st.button("Attendance List",use_container_width=True):
+            go_to("Attendence_list")
+    
+        st.toggle("Monthly Upload",
+              )
+        
+        st.divider()
+            
             
 # -------------------------- Admin Management ---------------------------------------------
-
 
 
         st.subheader("System Administration")
@@ -80,4 +92,5 @@ def admin_options_page():
         caption="Welcome to the Admin Control Panel",
         width='stretch'  # Icons often look better with a fixed width
     )
+
 
