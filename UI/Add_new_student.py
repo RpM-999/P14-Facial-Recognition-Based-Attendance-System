@@ -84,13 +84,22 @@ def add_new_students():
       
         with st.spinner(f"Found {len(student_records)} records. Processing and uploading..."):
             try:
-                processed_count = process_and_upload_students(student_records)
+                processed_count,email_success,email_fail = process_and_upload_students(student_records)
                 
                 st.success(f"✅ Successfully uploaded {processed_count} records!")
                 st.info("Data split between Supabase (info) and Qdrant (embeddings).")
                 
-                clear_sheet(sheet)
-                st.info("Temporary sheet has been cleared.")
+                
+                if email_success > 0:
+                    st.success(f"📧 Sent {email_success} confirmation emails successfully.")
+                if email_fail > 0:
+                    st.warning(f"⚠️ Failed to send {email_fail} confirmation emails. Check logs or student email addresses.")
+                
+                cleared_successfully = clear_sheet(sheet)
+                if cleared_successfully:
+                    st.info("Temporary sheet has been cleared.")
+                else:
+                    st.error("Failed to clear the temporary sheet. Please check manually.")
                 
             except Exception as e:
                 st.error(f"Failed to upload to database: {e}")

@@ -51,7 +51,11 @@ def admin_options_page():
             go_to("Update_department_info")
             
         st.divider()
-            
+
+
+#------------------------------ Attendence Management ------------------------------------
+
+
     
         st.subheader("Attendence Management")
     
@@ -82,8 +86,15 @@ def admin_options_page():
             st.session_state.admin_name = None
             # Redirect to the home page after logout
             go_to("Home") 
+            
+            
+            
 
     # --- Main Content Area ---
+    
+    
+    
+    
     st.title("Admin Dashboard")
     st.info("Select an option from the sidebar to get started.")
     # Corrected the parameter from use_column_width to use_container_width

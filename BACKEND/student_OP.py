@@ -1,16 +1,18 @@
 
-
+import streamlit as st
 import datetime
 import json
 import uuid
 from BACKEND.RDB_connection_OP import supabase
 from BACKEND.VDB_connection_OP import qdrant_client, QDRANT_COLLECTION_NAME
 from qdrant_client.http.models import PointStruct, Filter, FieldCondition, MatchValue
-
+from UTILS.send_email import send_registration_email
 
 
 
 def process_and_upload_students(student_records: list):
+    
+    processed_students_for_email = []
     
     try:
         
@@ -36,6 +38,10 @@ def process_and_upload_students(student_records: list):
         
             new_student_id = f"{today_str}-{str(current_index).zfill(4)}"
             current_index += 1
+            
+            student_detail_for_email = record.copy()
+            student_detail_for_email['S_id'] = new_student_id
+            processed_students_for_email.append(student_detail_for_email)
             
             
             face_embeddings_json = record.pop("S_live_face_photos")
@@ -76,11 +82,35 @@ def process_and_upload_students(student_records: list):
                 points=qdrant_points_payload,
                 wait=True # Wait for the operation to complete
             )
+            
+            
+            
+        email_success_count = 0
+        email_fail_count = 0
+        st.write("Sending confirmation emails...") # Give feedback in UI
+        email_progress_bar = st.progress(0)
+        
+        
+        for i, student_detail in enumerate(processed_students_for_email):
+            success, message = send_registration_email(student_detail)
+            if success:
+                email_success_count += 1
+            else:
+                email_fail_count += 1
+            email_progress_bar.progress((i + 1) / len(processed_students_for_email))
 
-        return len(supabase_batch_payload)
+        return len(supabase_batch_payload),email_success_count,email_fail_count
 
     except Exception as e:
         raise e
+    
+    
+    
+    
+    #------------------------------------------------ RETIVE STUDENT DATAILS------------------------------------------
+    
+    
+    
     
 def get_student_by_id(S_id):
     try:
@@ -97,6 +127,15 @@ def update_student_info(S_id, new_data):
                 .eq("S_id", S_id).execute()
     except Exception as e:
         raise e 
+    
+    
+    
+    
+    
+    #---------------------- UPDATE STUDENT FACE EMBEDDING WHOSE FACE RECOGNITION DOESNOT WORK PROPERLY----------
+    
+    
+    
     
 
 def update_student_embeddings(S_id, new_embeddings_list):
@@ -138,6 +177,12 @@ def update_student_embeddings(S_id, new_embeddings_list):
             
     except Exception as e:
         raise e
+    
+    
+    
+    #-------------------------------------- DELETE STUDENT DETAILS ---------------------------------------------
+    
+    
     
 def delete_student(student_id: str):
     try:

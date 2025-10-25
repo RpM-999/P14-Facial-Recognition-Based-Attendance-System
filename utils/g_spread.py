@@ -56,19 +56,22 @@ def read_from_sheet(sheet):
         return []
 
 def clear_sheet(sheet):
-    """
-    Clears all data from the sheet *except* for the header row (Row 1).
-    """
+    
     try:
-        # Get the total number of rows in the sheet
         row_count = sheet.row_count
         
-        # If there's more than just the header row, delete the rest
+        
         if row_count > 1:
-            # delete_rows() will remove all rows from row 2 to the end
+            print(f"Clear Sheet: Attempting to delete rows 2 to {row_count}.") # <-- Add Print
             sheet.delete_rows(2, row_count)
-            
-        return True
+            print("Clear Sheet: Deletion command sent.") # <-- Add Print
+            return True
+        else:
+            print("Clear Sheet: No rows to delete (only header exists).") # <-- Add Print
+            return True
+        
+        
     except Exception as e:
+        print(f"!!! Clear Sheet Error: {e}") # <-- Add Print
         st.error(f"⚠️ Error clearing sheet: {e}")
         return False
