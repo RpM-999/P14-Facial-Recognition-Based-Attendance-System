@@ -9,6 +9,9 @@ from qdrant_client.http.models import PointStruct, Filter, FieldCondition, Match
 from UTILS.send_email import send_registration_email
 
 
+#----------------------------------------------------------- REGISTER STUDENTS AND SEND MAIL--------------------------------------------------------
+
+
 
 def process_and_upload_students(student_records: list):
     
@@ -47,19 +50,13 @@ def process_and_upload_students(student_records: list):
             face_embeddings_json = record.pop("S_live_face_photos")
             face_embeddings_list = json.loads(face_embeddings_json)
             
-            # 5. Prepare Supabase payload (the *rest* of the record)
             
             
             record['S_id'] = new_student_id  # Add the new ID
             supabase_batch_payload.append(record)
             
             
-            
-            # 6. Prepare Qdrant payload (one point for each embedding)
-            
-            
             for i, embedding in enumerate(face_embeddings_list):
-                # We need a unique ID for each vector point
                 point_id = str(uuid.uuid4())
                 
                 qdrant_points_payload.append(
@@ -67,8 +64,8 @@ def process_and_upload_students(student_records: list):
                         id=point_id,
                         vector=embedding,
                         payload={
-                            "S_id": new_student_id, # Link back to the student
-                            "image_index": i # e.g., 0=front, 1=left, 2=right
+                            "S_id": new_student_id, 
+                            "image_index": i 
                         }
                     )
                 )  
@@ -80,14 +77,14 @@ def process_and_upload_students(student_records: list):
             qdrant_client.upsert(
                 collection_name=QDRANT_COLLECTION_NAME,
                 points=qdrant_points_payload,
-                wait=True # Wait for the operation to complete
+                wait=True 
             )
             
             
             
         email_success_count = 0
         email_fail_count = 0
-        st.write("Sending confirmation emails...") # Give feedback in UI
+        st.write("Sending confirmation emails...") 
         email_progress_bar = st.progress(0)
         
         
@@ -107,7 +104,7 @@ def process_and_upload_students(student_records: list):
     
     
     
-    #------------------------------------------------ RETIVE STUDENT DATAILS------------------------------------------
+    #----------------------------------------------------------- RETIVE STUDENT DATAILS---------------------------------------------------------
     
     
     
@@ -132,7 +129,7 @@ def update_student_info(S_id, new_data):
     
     
     
-    #---------------------- UPDATE STUDENT FACE EMBEDDING WHOSE FACE RECOGNITION DOESNOT WORK PROPERLY----------
+    #------------------------------------------ UPDATE STUDENT FACE EMBEDDING WHOSE FACE RECOGNITION DOESNOT WORK PROPERLY-------------------------------
     
     
     
@@ -180,7 +177,7 @@ def update_student_embeddings(S_id, new_embeddings_list):
     
     
     
-    #-------------------------------------- DELETE STUDENT DETAILS ---------------------------------------------
+    #-------------------------------------------------------- DELETE STUDENT DETAILS --------------------------------------------------------------------------
     
     
     
@@ -203,5 +200,50 @@ def delete_student(student_id: str):
         supabase.table("students").delete().eq("S_id", student_id).execute()
         
     except Exception as e:
-        # Raise the error to be handled by the frontend
         raise e
+
+
+
+#-------------------------------------------------------- SEARCH BY EMBEDDING -------------------------------------------------------------
+
+
+
+def find_student_by_embedding(live_embedding):
+    SIMILARITY_THRESHOLD = 0.75
+    try:
+        search_result = qdrant_client.search(
+            collection_name=QDRANT_COLLECTION_NAME,
+            query_vector=live_embedding,
+            limit=1,  
+            with_payload=True 
+        )
+
+        if not search_result:
+            return None, "No similar faces found in the database."
+
+        # Get the best match (the first result)
+        best_match = search_result[0]
+        score = best_match.score 
+        payload = best_match.payload 
+
+        if 'S_id' not in payload:
+             return None, "Database Error: Matched face data is incomplete."
+
+        student_id = payload['S_id']
+
+        # Compare the score against the threshold
+        if score >= SIMILARITY_THRESHOLD:
+            # Confident match found
+            print(f"Match found: {student_id} with score {score:.4f}") 
+            return student_id, f"Match found (Score: {score:.2f})"
+        else:
+            
+            return None, f"Recognition uncertain. (Closest match score {score:.2f} below threshold {SIMILARITY_THRESHOLD})"
+
+    except Exception as e:
+        raise Exception(f"Failed to search vector database: {e}")
+
+
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------

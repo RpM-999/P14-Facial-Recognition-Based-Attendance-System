@@ -1,7 +1,7 @@
 import datetime
-import pytz # Make sure to install pytz (pip install pytz)
+import pytz 
 from PIL import Image
-import streamlit as st # Only needed here if connect_to_gsheet uses st.secrets directly
+import streamlit as st 
 
 from BACKEND.RDB_connection_OP import supabase
 from BACKEND.student_OP import find_student_by_embedding, get_student_by_id
@@ -17,18 +17,17 @@ from UTILS.attendance_gspread import connect_to_gsheet, write_to_sheet
 try:
     LOCAL_TIMEZONE = pytz.timezone("Asia/Kolkata")
 except pytz.UnknownTimeZoneError:
-    print("Warning: Asia/Kolkata timezone not found, defaulting to UTC.")
     LOCAL_TIMEZONE = pytz.utc 
 
-ATTENDANCE_START_TIME = datetime.time(8, 0, 0)
-ATTENDANCE_END_TIME = datetime.time(10, 0, 0)
+ATTENDANCE_START_TIME = datetime.time(21,0,0)
+ATTENDANCE_END_TIME = datetime.time(23, 0, 0)
 
 
 
 #-------------------------------------- MAIN FUNCTION------------------------------------------------------
 
 
-def process_attendance_attempt(img_buffer):
+def identify_student_from_image(img_buffer):
     
     now_local_dt = datetime.datetime.now(LOCAL_TIMEZONE)
     now_local_time = now_local_dt.time()
@@ -67,50 +66,65 @@ def process_attendance_attempt(img_buffer):
         
         
         if not student_details:
-            print(f"CRITICAL ERROR: Matched S_id {student_id} in Qdrant but not found in Supabase.")
             return {"status": "error", 
                     "message": f"Data Integrity Error: Matched face (ID: {student_id}) but student details are missing."}
 
 
         name = student_details.get('S_name', 'N/A')
-        dept_id = student_details.get('dep_id', 'N/A') # Get the correct department foreign key
+        dept_id = student_details.get('dep_id', 'N/A') 
 
-        attendance_data = {
-            "Date": today_date_str, # Store today's date
-            "S_id": student_id,    # Store the matched student ID
-            "dep_id": dept_id      # Store the department ID
+        return {"status" : "found",
+                "message": f"Identified: {name} ({student_id})",
+                "student_info": { 
+                "S_id": student_id,
+                "S_name": name,
+                "dep_id": dept_id
+            }
+            
         }
+    except Exception as e:
+        return {"status": "error", 
+                "message": "An unexpected system error occurred during identification."}
+        
+        
+        
+        
+        
+#------------------------------------------------------ LOGIN-ATTENDANCE-------------------------------------------------------------
 
-        
+
+
+
+
+def log_attendance_to_sheet(student_info: dict):
+    
+    if not student_info or not student_info.get("S_id"):
+        return {"status": "error", 
+                "message": "Invalid student information provided for logging."}
+
+    try:
         attendance_sheet = connect_to_gsheet()
-        
-        
         if attendance_sheet is None:
-             
-             print("ERROR: Failed to connect to attendance Google Sheet.")
-             
+             print("ERROR: Failed to connect to attendance Google Sheet for logging.")
              return {"status": "error", 
-                     "message": "System Error: Failed to connect to the attendance log. Please contact admin."}
+                     "message": "System Error: Failed to connect to the attendance log."}
+
+        today_date_str = datetime.datetime.now(LOCAL_TIMEZONE).strftime("%Y-%m-%d") 
+        attendance_data = {
+            "Date": today_date_str,
+            "S_id": student_info.get("S_id"),    
+            "dep_id": student_info.get("dep_id")
+        }
 
         success_write, msg_write = write_to_sheet(attendance_sheet, attendance_data)
 
         if success_write:
-
-            return {
-                "status": "success",
-                "message": f"Attendance Logged for: **{name}**",
-                "details": f"ID: {student_id} | Dept: {dept_id}" # Return details for display
-            }
+    
+            return {"status": "success", 
+                    "message": f"Attendance logged successfully for {student_info.get('S_name')} ({student_info.get('S_id')})."}
         else:
             
-            print(f"ERROR: Failed to write attendance log to GSheet for {student_id}: {msg_write}")
-            return {"status": "error", 
-                    "message": f"Recognition OK, but failed to log attendance: {msg_write}. Please try again or contact admin."}
+            return {"status": "error", "message": f"Failed to log attendance: {msg_write}."}
 
     except Exception as e:
-        
-        print(f"!!! UNEXPECTED ERROR in process_attendance_attempt for student {student_id if 'student_id' in locals() else 'unknown'}: {e}")
-        # Return a generic error to the user
-        return {"status": "error", 
-                "message": f"An unexpected system error occurred during processing. Please contact admin."}
-
+        return {"status": "error", "message": "An unexpected system error occurred during logging."}
