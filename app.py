@@ -1,7 +1,7 @@
 import streamlit as st
 # Import all your page modules
 from UI import Home, Admin_login, Admin_option, Add_new_department ,Update_department_info 
-from UI import Add_new_student ,Update_student_info , Remove_student
+from UI import Add_new_student ,Update_student_info , Remove_student , Give_attendance
 
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
@@ -9,7 +9,7 @@ if "current_page" not in st.session_state:
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-#----------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------- LANDING PAGE -----------------------------------------------
 
 
 page = st.session_state.current_page
@@ -28,7 +28,7 @@ elif page == "Admin_option":
         Admin_login.login_page()
 
 
-#-------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------- ADMIN/ DEPARTMENT ------------------------------------
 
 
 elif page == "Add_new_department":
@@ -47,7 +47,7 @@ elif page == "Update_department_info":
         Admin_login.login_page()
         
         
-#------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------ ADMIN/STUDENT ---------------------------------------------------
         
         
 elif page == "Add_new_student":
@@ -72,8 +72,11 @@ elif page == "Remove_student":
         st.warning("🔒 Please log in to access this page.")
         Admin_login.login_page()
         
-        
-        
+    
+    #------------------------------------------------------------------------------------- GIVE ATTENDENCE ------------------------------------------
+    
+elif page == "Give_attendance":
+    Give_attendance.give_attendence()
         
 
 # --- Add other pages below using the same pattern ---
