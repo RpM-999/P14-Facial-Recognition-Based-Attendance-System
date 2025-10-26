@@ -10,4 +10,5 @@ gotrue
 qdrant-client
 httpx[http2]
 gspread
-google-auth 
+google-auth
+pytz

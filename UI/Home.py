@@ -17,4 +17,4 @@ def show():
             
     with col3:
         if st.button("Give Attendance"):
-            st.info("Attendance page coming soon")
+            go_to("Give_attendance")

@@ -62,7 +62,7 @@ def admin_options_page():
         if st.button("Attendance List",use_container_width=True):
             go_to("Attendence_list")
     
-        st.toggle("Monthly Upload",
+        st.toggle("Monthly Upload",value=True
               )
         
         st.divider()
