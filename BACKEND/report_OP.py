@@ -10,6 +10,13 @@ def generate_and_send_reports(attendance_df: pd.DataFrame, selected_departments_
     success_count = 0
     fail_count = 0
     month_year_str = start_date.strftime("%B-%Y") 
+    
+    
+    print("\n--- DEBUG: generate_and_send_reports ---") # DEBUG
+    print(f"Date Range: {start_date} to {end_date}") # DEBUG
+    print(f"Total Working Days: {total_working_days}") # DEBUG
+    print(f"Received Attendance DataFrame (dtype='{attendance_df['Date'].dtype if 'Date' in attendance_df else 'N/A'}', first 5 rows):") # DEBUG
+    print(attendance_df.head()) # DEBUG
 
     if total_working_days <= 0:
         st.warning("Cannot generate percentage report as Total Working Days is zero or less.")
@@ -19,6 +26,7 @@ def generate_and_send_reports(attendance_df: pd.DataFrame, selected_departments_
         dept_id = dept_info.get('dep_id')
         dept_name = dept_info.get('dep_name', 'Unknown Department')
         hod_email = dept_info.get('dep_hod_mail')
+        print(f"\nProcessing Dept: {dept_name} (ID: {dept_id}, Type: {type(dept_id)})") # DEBUG
 
         if not hod_email:
             st.warning(f"Skipping department '{dept_name}': HOD email missing.")
@@ -34,20 +42,28 @@ def generate_and_send_reports(attendance_df: pd.DataFrame, selected_departments_
                 continue 
 
             df_roster = pd.DataFrame(students_in_dept) 
-            df_dept_attendance = attendance_df[attendance_df['dep_id'] == dept_id].copy()
+            print(f"- Fetched Roster (first 5):\n{df_roster.head()}") # DEBUG
+            df_dept_attendance = attendance_df[attendance_df['dep_id'].astype('str') == str(dept_id)].copy()
 
             if not df_dept_attendance.empty:
                 attendance_counts = df_dept_attendance.groupby('S_id')['Date'].nunique().reset_index(name='days_present')
+                print(f"- Attendance Counts (nunique dates):\n{attendance_counts}") # DEBUG
             else:
                 attendance_counts = pd.DataFrame(columns=['S_id', 'days_present'])
+                st.write(f"- No attendance records found for {dept_name} in this period.")
+                print("- No attendance records found for this dept in this period.") # DEBUG
 
 
             df_report = pd.merge(df_roster, attendance_counts, on='S_id', how='left')
             df_report['days_present'].fillna(0, inplace=True)
             df_report['days_present'] = df_report['days_present'].astype(int) 
+            print(f"- Report DF after merge (check days_present):\n{df_report.head()}") # DEBUG
 
-            df_report['attendance_percentage'] = (df_report['days_present'] / total_working_days) * 100
-            df_report['attendance_percentage'] = df_report['attendance_percentage'].round(2) 
+            if total_working_days > 0:
+                 df_report['attendance_percentage'] = (df_report['days_present'] / total_working_days) * 100
+                 df_report['attendance_percentage'] = df_report['attendance_percentage'].round(2) # Round to 2 decimal places
+            else:
+                 df_report['attendance_percentage'] = 0.0
 
             df_final_report = pd.DataFrame({
                 'Month-Year': month_year_str,

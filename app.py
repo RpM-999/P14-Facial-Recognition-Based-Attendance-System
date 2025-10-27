@@ -2,6 +2,7 @@ import streamlit as st
 # Import all your page modules
 from UI import Home, Admin_login, Admin_option, Add_new_department ,Update_department_info 
 from UI import Add_new_student ,Update_student_info , Remove_student , Give_attendance
+from UI import Attendance_list
 
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
@@ -77,6 +78,18 @@ elif page == "Remove_student":
     
 elif page == "Give_attendance":
     Give_attendance.give_attendence()
+        
+        
+#-------------------------------------------------- ADMIN/ATTENDANCE ---------------------------------
+
+
+
+elif page == "Attendence_list":
+    if st.session_state.logged_in:
+       Attendance_list.attendance_list()
+    else:
+        st.warning("🔒 Please log in to access this page.")
+        Admin_login.login_page()
         
 
 # --- Add other pages below using the same pattern ---

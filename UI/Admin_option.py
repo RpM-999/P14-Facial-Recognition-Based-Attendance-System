@@ -79,7 +79,9 @@ def admin_options_page():
         
         st.divider()
 
-        # --- Logout Button ---
+# ----------------------------------------- Logout Button ---------------------------------------
+
+
         if st.button("Logout", use_container_width=True, type="primary"):
             # Clear relevant session state keys on logout
             st.session_state.logged_in = False
@@ -90,18 +92,18 @@ def admin_options_page():
             
             
 
-    # --- Main Content Area ---
+    # --------------------------------------- Main Content Area ---------------------------------
     
     
     
     
-    st.title("Admin Dashboard")
+    st.title("Admin Panel")
     st.info("Select an option from the sidebar to get started.")
     # Corrected the parameter from use_column_width to use_container_width
     st.image(
         "IMAGES/img.png",
         caption="Welcome to the Admin Control Panel",
-        width='stretch'  # Icons often look better with a fixed width
+        width='stretch' 
     )
 
 
