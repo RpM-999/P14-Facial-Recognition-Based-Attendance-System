@@ -1,7 +1,7 @@
 import streamlit as st
 from UTILS.navigation import go_to
 from BACKEND.RDB_connection_OP import supabase 
-from UTILS.attendance_gspread import connect_to_gsheet, read_from_sheet
+from UTILS.attendance_gspread import connect_to_gsheet, read_attendance_sheet
 from BACKEND.department_OP import get_departments_with_hod
 from BACKEND.report_OP import generate_and_send_reports
 import datetime
@@ -146,7 +146,7 @@ def attendance_list():
                 
                 with st.spinner("Fetching attendance data and processing reports..."):
                     try:
-                        all_attendance_records = read_from_sheet(attendance_sheet)
+                        all_attendance_records = read_attendance_sheet(attendance_sheet)
                         if not all_attendance_records:
                              st.warning("No attendance records found in the temporary log.")
                              st.stop() 

@@ -2,6 +2,11 @@ from BACKEND.RDB_connection_OP import supabase
 import streamlit as st
 
 
+#---------------------------------ADD NEW DEPARTMENT--------------------------------------------
+
+
+
+
 def add_department(dep_id , dep_name , dep_hod, dep_hod_mail):
     try:
         data = {
@@ -15,6 +20,11 @@ def add_department(dep_id , dep_name , dep_hod, dep_hod_mail):
     except Exception as e:
         raise e
     
+    
+    
+#---------------------------------RETRIVE ALL THE DEPARTMENTS--------------------------------------
+    
+    
 def get_all_departments():
     """Fetches all departments from the database."""
     try:
@@ -24,10 +34,12 @@ def get_all_departments():
         st.error(f"Error fetching departments: {e}")
         return []
     
+    
+#------------------------------------ UPDATE DEPARTMENT INFORMATIONS --------------------------------
+
+
+    
 def update_department(dep_id, dep_name ,dep_hod,dep_hod_mail):
-    """
-    Updates a specific department in the database using its dep_id.
-    """
     try:
         
         new_data = {
@@ -39,3 +51,20 @@ def update_department(dep_id, dep_name ,dep_hod,dep_hod_mail):
         
     except Exception as e:
         raise e
+    
+    
+#------------------------------- FETCH DEPARTMENT INFO ----------------------------------------------
+
+
+def get_departments_with_hod():
+    try:
+        response = supabase.table("department") \
+                           .select("dep_id, dep_name, dep_hod_mail") \
+                           .order("dep_name", desc=False) \
+                           .execute()
+
+        return response.data
+
+    except Exception as e:
+        st.error(f"Could not fetch department list with HOD info: {e}")
+        return [] 
