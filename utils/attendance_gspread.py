@@ -65,16 +65,16 @@ def write_to_sheet(sheet, data_row: dict):
 
 
 
+#----------------------------------------- READ FROM THE GOOGLE SHEET-------------------------------
 
 
 
-# --- Optional: Add a read function if needed later ---
-# def read_attendance_sheet(sheet):
-#     """Reads all data from the attendance sheet."""
-#     if sheet is None: return []
-#     try:
-#         data = sheet.get_all_records() # Assumes headers in row 1
-#         return data
-#     except Exception as e:
-#         st.error(f"⚠️ Error reading attendance sheet: {e}")
-#         return []
+def read_attendance_sheet(sheet):
+    if sheet is None: 
+        return []
+    try:
+        data = sheet.get_all_records() 
+        return data
+    except Exception as e:
+        st.error(f"⚠️ Error reading attendance sheet: {e}")
+        return []

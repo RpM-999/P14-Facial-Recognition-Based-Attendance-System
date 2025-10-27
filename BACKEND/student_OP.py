@@ -246,4 +246,14 @@ def find_student_by_embedding(live_embedding):
 
 
 
-#------------------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------STUDENT LIST BASED ON SELECTED DEPARTMENT ---------------------------------
+
+def get_students_by_department(department_id: str):
+    try:
+        response = supabase.table("students").select("S_id, S_name") \
+                           .eq("dep_id", department_id) \
+                           .order("S_name") \
+                           .execute()
+        return response.data 
+    except Exception as e:
+        return [] 
