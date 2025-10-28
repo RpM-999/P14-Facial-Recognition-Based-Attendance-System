@@ -44,7 +44,6 @@ def admin_options_page():
         st.subheader("Department Management")
 
         if st.button("Add Department", use_container_width=True):
-            # Corrected the page name to be consistent (lowercase)
             go_to("Add_new_department")
 
         if st.button("Update Department Info", use_container_width=True):
@@ -73,9 +72,9 @@ def admin_options_page():
 
         st.subheader("System Administration")
         if st.button("Add New Admin", use_container_width=True):
-            go_to("add_admin")
+            go_to("Add_admin")
         if st.button("Remove Admin", use_container_width=True):
-            go_to("remove_admin")
+            go_to("Remove_admin")
         
         st.divider()
 
