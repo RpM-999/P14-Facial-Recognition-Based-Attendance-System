@@ -140,6 +140,8 @@ def give_attendence():
     
     st.markdown("---")
     if st.button("⬅️ Back to Home"): 
+        st.session_state.identified_student = None
+        st.session_state.log_result = None
         go_to("Home") 
         st.rerun()
         
