@@ -1,5 +1,5 @@
 import streamlit as st
-from UTILS.navigation import go_to
+from FUNC.navigation import go_to
 from BACKEND.admin_OP import admin_verification 
 from BACKEND.RDB_connection_OP import supabase
 
@@ -8,7 +8,6 @@ def login_page():
     
     
     if st.session_state.get("logged_in", False):
-        # If already logged in, just go to the admin page and stop
         go_to("Admin_option")
         st.rerun()
         return

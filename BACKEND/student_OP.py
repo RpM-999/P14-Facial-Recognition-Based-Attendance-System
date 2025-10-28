@@ -6,7 +6,7 @@ import uuid
 from BACKEND.RDB_connection_OP import supabase
 from BACKEND.VDB_connection_OP import qdrant_client, QDRANT_COLLECTION_NAME
 from qdrant_client.http.models import PointStruct, Filter, FieldCondition, MatchValue
-from UTILS.send_email import send_registration_email
+from FUNC.send_email import send_registration_email
 
 
 #----------------------------------------------------------- REGISTER STUDENTS AND SEND MAIL--------------------------------------------------------

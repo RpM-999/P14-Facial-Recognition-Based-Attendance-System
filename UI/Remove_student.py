@@ -1,12 +1,12 @@
-# In fun/Remove_student.py
-
 import streamlit as st
-from UTILS.navigation import go_to
-# Import the necessary backend functions
+from FUNC.navigation import go_to
 from BACKEND.student_OP import get_student_by_id, delete_student
 
 def remove_student():
-    # --- Auth Check ---
+    
+    # --------------------------- Auth Check ---------------------------------------------
+    
+    
     if not st.session_state.get("logged_in"):
         st.warning("You must be logged in to view this page.")
         if st.button("Go to Login"):
@@ -16,11 +16,17 @@ def remove_student():
 
     st.title("Remove Student")
 
-    # --- Initialize State ---
+    # --------------------------------------- Initialize State -------------------------------------
+    
+    
     if "student_to_remove" not in st.session_state:
         st.session_state.student_to_remove = None
 
-    # --- Search Phase ---
+
+
+    # ---------------------------------------- Search Phase -------------------------------------------
+    
+    
     if st.session_state.student_to_remove is None:
         st.subheader("Step 1: Find Student to Remove")
         search_id = st.text_input("Enter Student ID to find (e.g., 251021-0000)")
@@ -33,11 +39,16 @@ def remove_student():
                     student_data = get_student_by_id(search_id)
                     if student_data:
                         st.session_state.student_to_remove = student_data
-                        st.rerun() # Rerun to show the confirmation step
+                        st.rerun() 
                     else:
                         st.error("Student ID not found.")
 
-    # --- Confirmation Phase ---
+
+
+    # ---------------------------------------- Confirmation Phase --------------------------------
+    
+    
+    
     else:
         student = st.session_state.student_to_remove
         st.subheader("Step 2: Confirm Deletion")
@@ -55,7 +66,6 @@ def remove_student():
                     try:
                         delete_student(student['S_id'])
                         st.success(f"Successfully deleted {student['S_name']}.")
-                        # Clear state to go back to search
                         del st.session_state.student_to_remove
                         st.rerun()
                     except Exception as e:
@@ -66,8 +76,13 @@ def remove_student():
                 # Clear state to go back to search
                 del st.session_state.student_to_remove
                 st.rerun()
+                
+                
 
-    # --- Back to Menu Button ---
+    # --------------------------------------- Back to Menu Button ------------------------------------
+    
+    
+    
     st.markdown("---")
     if st.button("⬅️ Back to Admin Menu"):
         # Clear state if necessary before leaving

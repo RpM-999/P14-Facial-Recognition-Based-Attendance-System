@@ -1,5 +1,4 @@
 import streamlit as st
-# Import all your page modules
 from UI import Home, Admin_login, Admin_option, Add_new_department ,Update_department_info 
 from UI import Add_new_student ,Update_student_info , Remove_student , Give_attendance
 from UI import Attendance_list

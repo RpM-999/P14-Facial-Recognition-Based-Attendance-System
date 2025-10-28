@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from .RDB_connection_OP import supabase 
 from .student_OP import get_students_by_department 
-from UTILS.send_email import send_report_email 
+from FUNC.send_email import send_report_email 
 import datetime
 
 def generate_and_send_reports(attendance_df: pd.DataFrame, selected_departments_info: list, total_working_days: int, start_date: datetime.date, end_date: datetime.date):

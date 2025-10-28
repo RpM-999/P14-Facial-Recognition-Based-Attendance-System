@@ -1,7 +1,5 @@
-
-
 import streamlit as st
-from UTILS.navigation import go_to
+from FUNC.navigation import go_to
 from BACKEND.department_OP import get_all_departments, update_department
 
 def update_department_info_page():
@@ -24,9 +22,7 @@ def update_department_info_page():
             st.rerun()
         return
 
-    # --- 3. Create Selectbox to choose department ---
-    # The 'format_func' shows the pretty name in the box,
-    # but 'selected_dept' will contain the *entire dictionary* for that department.
+
     selected_dept = st.selectbox(
         "Select Department to Update",
         options=departments_list,
@@ -39,7 +35,13 @@ def update_department_info_page():
     st.markdown("---")
     st.subheader(f"Updating: {selected_dept['dep_name']}")
 
-    # --- 4. Create the Edit Form ---
+
+
+
+    # ----------------------  Create the Edit Form ------------------------------------
+    
+    
+    
     with st.form("update_department_form"):
 
         st.text_input("Department ID (dep_id)", value=selected_dept['dep_id'], disabled=True)
@@ -52,7 +54,12 @@ def update_department_info_page():
         submitted = st.form_submit_button("Save Changes")
 
         if submitted:
-            # --- 5. Save Changes ---
+            
+            
+            # ------------------------------------------ Save Changes -------------------------------
+            
+            
+            
             if not all([new_dep_name, new_dep_hod, new_dep_hod_mail]):
                 st.warning("Please fill out all fields.")
             else:
@@ -67,7 +74,12 @@ def update_department_info_page():
                 except Exception as e:
                     st.error(f"An error occurred: {e}")
 
-    # --- Back Button ---
+
+
+    # --------------------------------------- Back Button ----------------------------------------
+    
+    
+    
     if st.button("⬅️ Back to Admin Menu"):
         go_to("Admin_option")
         st.rerun()

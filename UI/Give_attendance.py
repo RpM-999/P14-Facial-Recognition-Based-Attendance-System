@@ -1,5 +1,5 @@
 import streamlit as st
-from UTILS.navigation import go_to # Assuming go_to is still needed for Back button
+from FUNC.navigation import go_to # Assuming go_to is still needed for Back button
 from PIL import Image
 from BACKEND.attendance_OP import identify_student_from_image, log_attendance_to_sheet
 from BACKEND.attendance_OP import ATTENDANCE_START_TIME, ATTENDANCE_END_TIME, LOCAL_TIMEZONE

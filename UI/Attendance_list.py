@@ -1,7 +1,7 @@
 import streamlit as st
-from UTILS.navigation import go_to
 from BACKEND.RDB_connection_OP import supabase 
-from UTILS.attendance_gspread import connect_to_gsheet, read_attendance_sheet
+from FUNC.navigation import go_to
+from FUNC.attendance_gspread import connect_to_gsheet, read_attendance_sheet
 from BACKEND.department_OP import get_departments_with_hod
 from BACKEND.report_OP import generate_and_send_reports
 import datetime

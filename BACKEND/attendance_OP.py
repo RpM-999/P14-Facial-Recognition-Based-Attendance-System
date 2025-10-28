@@ -5,8 +5,8 @@ import streamlit as st
 
 from BACKEND.RDB_connection_OP import supabase
 from BACKEND.student_OP import find_student_by_embedding, get_student_by_id
-from UTILS.face_embedding_OP import get_face_embedding
-from UTILS.attendance_gspread import connect_to_gsheet, write_to_sheet
+from FUNC.face_embedding_OP import get_face_embedding
+from FUNC.attendance_gspread import connect_to_gsheet, write_to_sheet
 
 
 

@@ -1,5 +1,5 @@
 import streamlit as st
-from UTILS.navigation import go_to
+from FUNC.navigation import go_to
 
 def admin_options_page():
    

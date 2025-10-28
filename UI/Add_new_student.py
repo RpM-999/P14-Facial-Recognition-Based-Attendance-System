@@ -1,32 +1,22 @@
-
-
 import streamlit as st
-from UTILS.navigation import go_to
 from BACKEND.RDB_connection_OP import supabase
-from UTILS.g_spread import connect_to_gsheet, read_from_sheet, clear_sheet
+from FUNC.navigation import go_to
+from FUNC.g_spread import connect_to_gsheet, read_from_sheet, clear_sheet
 import json
 import datetime
 from BACKEND.student_OP import process_and_upload_students
 
-REGISTRATION_FORM_URL = "https://your-student-form-app.streamlit.app" 
+REGISTRATION_FORM_URL = "https://p14-student-registration-form.streamlit.app/" 
 
-st.markdown("""
-    <style>
-    .stKey-my_red_button > button {
-        color: red !important;
-    }
-    .stKey-my_green_button > button {
-        color: green !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
+# -----------------------------CONFIRM GOOGLE SHEET CONNECTION-----------------------------------
 
 try:
     sheet = connect_to_gsheet()
 except Exception as e:
     st.error(f"Could not connect to Google Sheets: {e}")
     st.stop()
+
+
 
 
 def add_new_students():
@@ -43,6 +33,13 @@ def add_new_students():
     st.write("Control the live student registration form.")
     
     col1, col2 = st.columns(2)
+    
+    
+    
+    #------------------------ AFTER OPENING STUDENT CAN REGISTER THEMSELF --------------------------
+    
+    
+    
     if col1.button("🟩 Open Registration Form 🟩",width='stretch'):
         try:
             
@@ -66,9 +63,15 @@ def add_new_students():
         except Exception as e:
             st.error(f"Failed to close form: {e}")
 
+
+
     st.markdown("---")
     st.header("Data Upload")
     st.write("Pull student data from the temporary sheet and save it to the main database.")
+    
+    
+    # ----------------------------UPLOAD DATA FROM GOOGLE SHEET TO DATABASE-------------------------------
+    
     
     if st.button("Upload New Students to Database", width='stretch'):
         if sheet is None:
@@ -90,6 +93,10 @@ def add_new_students():
                 st.info("Data split between Supabase (info) and Qdrant (embeddings).")
                 
                 
+                
+# ------------------------------------AFTER SUCCESSFULLY REGISTER THEY GOT MAIL-------------------------
+                
+                
                 if email_success > 0:
                     st.success(f"📧 Sent {email_success} confirmation emails successfully.")
                 if email_fail > 0:
@@ -105,6 +112,9 @@ def add_new_students():
                 st.error(f"Failed to upload to database: {e}")
                 st.warning("Data has NOT been cleared from the sheet.")
     
+
+
+
 
     st.markdown("---")
     if st.button("🔙 Back to Admin Menu"):
