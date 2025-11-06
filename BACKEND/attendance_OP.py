@@ -19,7 +19,7 @@ try:
 except pytz.UnknownTimeZoneError:
     LOCAL_TIMEZONE = pytz.utc 
 
-ATTENDANCE_START_TIME = datetime.time(21,0,0)
+ATTENDANCE_START_TIME = datetime.time(20,0,0)
 ATTENDANCE_END_TIME = datetime.time(23, 0, 0)
 
 

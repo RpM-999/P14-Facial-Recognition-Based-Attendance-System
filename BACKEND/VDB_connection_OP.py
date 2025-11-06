@@ -34,3 +34,6 @@ try:
 except Exception as e:
     st.error(f"Error connecting to Qdrant: {e}")
     st.stop() 
+    
+    
+    

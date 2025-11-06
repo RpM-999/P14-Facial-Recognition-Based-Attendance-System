@@ -10,7 +10,7 @@ if "current_page" not in st.session_state:
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-#---------------------------------------------------------------------------------------- LANDING PAGE -----------------------------------------------
+#----------------------------------------------------------------- LANDING PAGE -----------------------------------------------
 
 
 page = st.session_state.current_page
@@ -25,7 +25,7 @@ elif page == "Admin_option":
     if st.session_state.logged_in:
         Admin_option.admin_options_page()
     else:
-        st.warning("🔒 Please log in to access the Admin Panel.")
+        st.warning(" Please log in to access the Admin Panel.")
         Admin_login.login_page()
 
 
@@ -37,14 +37,14 @@ elif page == "Add_new_department":
     if st.session_state.logged_in:
         Add_new_department.Add_new_department_page()
     else:
-        st.warning("🔒 Please log in to access this page.")
+        st.warning(" Please log in to access this page.")
         Admin_login.login_page()
         
 elif page == "Update_department_info":
     if st.session_state.logged_in:
        Update_department_info.update_department_info_page()
     else:
-        st.warning("🔒 Please log in to access this page.")
+        st.warning(" Please log in to access this page.")
         Admin_login.login_page()
         
         
@@ -55,7 +55,7 @@ elif page == "Add_new_student":
     if st.session_state.logged_in:
        Add_new_student.add_new_students()
     else:
-        st.warning("🔒 Please log in to access this page.")
+        st.warning(" Please log in to access this page.")
         Admin_login.login_page()
         
         
@@ -63,14 +63,14 @@ elif page == "Update_student_info":
     if st.session_state.logged_in:
        Update_student_info.update_student()
     else:
-        st.warning("🔒 Please log in to access this page.")
+        st.warning(" Please log in to access this page.")
         Admin_login.login_page()
         
 elif page == "Remove_student":
     if st.session_state.logged_in:
        Remove_student.remove_student()
     else:
-        st.warning("🔒 Please log in to access this page.")
+        st.warning(" Please log in to access this page.")
         Admin_login.login_page()
         
     
@@ -88,7 +88,7 @@ elif page == "Attendence_list":
     if st.session_state.logged_in:
        Attendance_list.attendance_list()
     else:
-        st.warning("🔒 Please log in to access this page.")
+        st.warning(" Please log in to access this page.")
         Admin_login.login_page()
         
 
@@ -98,7 +98,7 @@ elif page == "Add_admin":
     if st.session_state.logged_in:
         Add_admin.add_admin()
     else:
-        st.warning("🔒 Please log in to access this page.")
+        st.warning(" Please log in to access this page.")
         Admin_login.login_page()
         
         
@@ -107,7 +107,7 @@ elif page == "Remove_admin":
     if st.session_state.logged_in:
         Remove_admin.remove_admin()
     else:
-        st.warning("🔒 Please log in to access this page.")
+        st.warning(" Please log in to access this page.")
         Admin_login.login_page()
 
 

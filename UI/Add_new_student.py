@@ -40,7 +40,7 @@ def add_new_students():
     
     
     
-    if col1.button("🟩 Open Registration Form 🟩",width='stretch'):
+    if col1.button(" Open Registration Form ",width='stretch'):
         try:
             
             supabase.table("app_controls") \
@@ -52,7 +52,7 @@ def add_new_students():
         except Exception as e:
             st.error(f"Failed to open form: {e}")
 
-    if col2.button("🟥 Close Registration Form 🟥", width='stretch'):
+    if col2.button(" Close Registration Form ", width='stretch'):
         try:
             
             supabase.table("app_controls") \
@@ -89,7 +89,7 @@ def add_new_students():
             try:
                 processed_count,email_success,email_fail = process_and_upload_students(student_records)
                 
-                st.success(f"✅ Successfully uploaded {processed_count} records!")
+                st.success(f" Successfully uploaded {processed_count} records!")
                 st.info("Data split between Supabase (info) and Qdrant (embeddings).")
                 
                 
@@ -98,9 +98,9 @@ def add_new_students():
                 
                 
                 if email_success > 0:
-                    st.success(f"📧 Sent {email_success} confirmation emails successfully.")
+                    st.success(f" Sent {email_success} confirmation emails successfully.")
                 if email_fail > 0:
-                    st.warning(f"⚠️ Failed to send {email_fail} confirmation emails. Check logs or student email addresses.")
+                    st.warning(f" Failed to send {email_fail} confirmation emails. Check logs or student email addresses.")
                 
                 cleared_successfully = clear_sheet(sheet)
                 if cleared_successfully:

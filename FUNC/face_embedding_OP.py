@@ -8,11 +8,9 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 
 @st.cache_resource
+
 def load_models():
-    """
-    Loads and caches the MTCNN (for face detection) and 
-    InceptionResnetV1 (for face embedding) models.
-    """
+    
     mtcnn = MTCNN(
         image_size=160, 
         margin=0, 
@@ -36,7 +34,7 @@ def get_face_embedding(image):
     image_rgb = image.convert('RGB')
     face_tensor = mtcnn(image_rgb, save_path=None)
     if face_tensor is None:
-        return None, "❌ No face detected. Please try again."
+        return None, " No face detected. Please try again."
 
     face_tensor = face_tensor.to(device)
     
@@ -46,4 +44,6 @@ def get_face_embedding(image):
    
     embedding_list = embedding.detach().cpu().numpy()[0].tolist()
     
-    return embedding_list, "✅ Face embedding created successfully!"
+    return embedding_list, " Face embedding created successfully!"
+
+

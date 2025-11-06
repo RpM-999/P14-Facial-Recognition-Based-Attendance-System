@@ -61,8 +61,8 @@ def admin_options_page():
         if st.button("Attendance List",use_container_width=True):
             go_to("Attendence_list")
     
-        st.toggle("Monthly Upload",value=True
-              )
+        #st.toggle("Monthly Upload",value=True
+        # )
         
         st.divider()
             
@@ -70,13 +70,7 @@ def admin_options_page():
 # -------------------------- Admin Management ---------------------------------------------
 
 
-        st.subheader("System Administration")
-        if st.button("Add New Admin", use_container_width=True):
-            go_to("Add_admin")
-        if st.button("Remove Admin", use_container_width=True):
-            go_to("Remove_admin")
-        
-        st.divider()
+    
 
 # ----------------------------------------- Logout Button ---------------------------------------
 

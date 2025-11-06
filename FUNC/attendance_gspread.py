@@ -58,10 +58,10 @@ def write_to_sheet(sheet, data_row: dict):
 
         sheet.append_row(ordered_data)
 
-        return True, "✅ Attendance data saved to sheet successfully."
+        return True, " Attendance data saved to sheet successfully."
     except Exception as e:
         print(f"!!! Error writing to attendance sheet: {e}") # Log detailed error server-side
-        return False, f"⚠️ Error writing attendance log: {e}"
+        return False, f" Error writing attendance log: {e}"
 
 
 
@@ -76,5 +76,8 @@ def read_attendance_sheet(sheet):
         data = sheet.get_all_records() 
         return data
     except Exception as e:
-        st.error(f"⚠️ Error reading attendance sheet: {e}")
+        st.error(f" Error reading attendance sheet: {e}")
         return []
+    
+    
+    
