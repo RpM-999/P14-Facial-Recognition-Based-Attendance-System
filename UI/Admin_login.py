@@ -12,7 +12,7 @@ def login_page():
         st.rerun()
         return
     
-    st.title("🔐 Admin Panel")
+    st.title(" Admin Panel")
     
     with st.form("admin_login_form"):
         email = st.text_input("Enter Admin Email")
@@ -32,11 +32,11 @@ def login_page():
             if is_admin:
                 st.session_state.logged_in = True
                 st.session_state.admin_email = message
-                st.success(f"✅ Login successful! Welcome")
+                st.success(f"Login successful! Welcome")
                 go_to("Admin_option" )
                 st.rerun()
             else:
-                st.warning(f"❌ {message}")         
+                st.warning(f" {message}")         
                 
         if home_button:
             go_to("Home")

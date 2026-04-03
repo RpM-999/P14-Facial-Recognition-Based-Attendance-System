@@ -1,25 +1,17 @@
 import streamlit as st
-from BACKEND.RDB_connection_OP import supabase 
-from FUNC.navigation import go_to
-from FUNC.attendance_gspread import connect_to_gsheet, read_attendance_sheet
+from BACKEND.report_OP import get_attendance_from_gold, generate_and_send_reports
 from BACKEND.department_OP import get_departments_with_hod
-from BACKEND.report_OP import generate_and_send_reports
+from FUNC.navigation import go_to
 import datetime
-import pandas as pd 
-
-# ----------------------------------- CONNECT TO THE ATTENDANCE SHEET---------------------------------
+import pandas as pd
 
 
+def attendance_list():
 
-attendance_sheet = connect_to_gsheet()
+
+    # ---------------- AUTH CHECK ----------------
 
 
-def attendance_list(): 
-
-    
-    # ------------------------------- Authentication check -------------------------------------------
-    
-    
     if not st.session_state.get("logged_in"):
         st.warning("You must be logged in to view this page.")
         if st.button("Go to Login"):
@@ -28,17 +20,15 @@ def attendance_list():
         return
 
 
-#----------------------------------------------------------------------------------------------------
+
+
+    st.title(" Attendance List & Reporting")
+
+
+    # ---------------- DATE SELECTION ----------------
 
 
 
-    st.title("📊 Attendance List & Reporting")
-    
-    
-
-    # ---------------------------- SELECT FIRST AND THE LAST DATE  ---------------------------------
-    
-    
     st.header("Select Reporting Period")
 
     today = datetime.date.today()
@@ -46,168 +36,165 @@ def attendance_list():
 
     col1, col2 = st.columns(2)
     with col1:
-        start_date = st.date_input("📅Start Date (inclusive)", value=start_of_month, max_value=today, key="att_start_date")
+        start_date = st.date_input(
+            " Start Date",
+            value=start_of_month,
+            max_value=today,
+            key="att_start_date"
+        )
     with col2:
-        end_date = st.date_input("📅End Date (inclusive)", value=today, min_value=start_date, max_value=today, key="att_end_date")
-        
+        end_date = st.date_input(
+            " End Date",
+            value=today,
+            min_value=start_date,
+            max_value=today,
+            key="att_end_date"
+        )
 
-    # --------------------------------- NUMBER OF WORKING DAYS ------------------------------------
-    
-    
-    
-    total_working_days = 0 
-    potential_working_days = 0
-    num_holidays = 0
+    # ---------------- WORKING DAYS ----------------
+
+
+
+    total_working_days = 0
+
     try:
-
         date_range = pd.date_range(start_date, end_date)
 
         working_days_df = date_range[date_range.dayofweek < 5]
         potential_working_days = len(working_days_df)
 
-
-#-------------------------- NO OF HOLIDAYS EXCEPT FROM SATARDAY AND SUNDAY--------------------------
-
-
         if potential_working_days > 0:
             num_holidays = st.slider(
-                "Number of Additional Holidays (excluding weekends)",
+                "Number of Additional Holidays",
                 min_value=0,
                 max_value=potential_working_days,
-                value=0,
-                key="att_holidays_slider",
-                help=f"Select official holidays within {start_date} and {end_date}. Weekends are already excluded."
+                value=0
             )
-            
-            
-            total_working_days = potential_working_days - num_holidays
-            if total_working_days < 0: 
-                total_working_days = 0 
-        else:
-             num_holidays = 0 # No potential working days, so 0 holidays
-             total_working_days = 0
-             st.info("Selected date range contains no weekdays.")
 
-        # Display calculation result
-        st.info(f"Selected Period: {start_date.strftime('%d %b %Y')} to {end_date.strftime('%d %b %Y')}\n"
-                f"Calculated Working Days: **{total_working_days}** ({potential_working_days} weekdays - {num_holidays} holidays)")
+            total_working_days = potential_working_days - num_holidays
+            total_working_days = max(total_working_days, 0)
+
+        else:
+            st.info("No weekdays in selected range.")
+            total_working_days = 0
+
+        st.info(
+            f" {start_date} → {end_date} | "
+            f"Working Days: **{total_working_days}**"
+        )
 
     except Exception as e:
         st.error(f"Error calculating working days: {e}")
-        total_working_days = -1 # Indicate an error occurred
+        return
 
     st.markdown("---")
 
 
 
+    # ---------------- DEPARTMENT SELECTION ----------------
 
-    # ------------------------------ SEND THE LIST TO HODs --------------------------------------
-    
-    
-    
-    
-    
+
+
     st.header("Send Attendance Report to HODs")
 
     departments = get_departments_with_hod()
-    
+
     if not departments:
-        st.warning("No departments found in the database. Cannot send reports.")
-    else:
-        st.write("Select departments to include in the report:")
+        st.warning("No departments found.")
+        return
 
-        selected_departments_info = [] 
-        
-        
-        for dept in departments:
-            
-            is_selected = st.checkbox(
-                f"{dept.get('dep_name', 'N/A')} (HOD: {dept.get('dep_hod_mail', 'N/A')})",
-                key=f"dept_select_{dept.get('dep_id')}" 
-            )
-            if is_selected:
-                selected_departments_info.append(dept)
+    selected_departments_info = []
 
-        send_button_disabled = total_working_days < 0 or not departments
+    for dept in departments:
+        if st.checkbox(
+            f"{dept['dep_name']} (HOD: {dept['dep_hod_mail']})",
+            key=f"dept_{dept['dep_id']}"
+        ):
+            selected_departments_info.append(dept)
 
-        if st.button("✉️ Generate & Send Reports", type="primary", disabled=send_button_disabled, key="send_report_btn"):
-            
-            
-            if not selected_departments_info:
-                st.warning("Please select at least one department.")
-            elif attendance_sheet is None:
-                 st.error("Cannot connect to the attendance log sheet.")
-            else:
+
+
+    # ---------------- BUTTON ----------------
+
+
+
+    if st.button(" Generate & Send Reports", type="primary"):
+
+        if not selected_departments_info:
+            st.warning("Select at least one department.")
+            return
+
+        if total_working_days <= 0:
+            st.warning("Working days must be > 0")
+            return
+
+
+
+        # ---------------- MAIN LOGIC ----------------
+
+
+
+        with st.spinner("Fetching data from Data Warehouse..."):
+
+            try:
                 
-                
-                
-# ----------------------------------------- Trigger Backend Logic --------------------------------------------------
-                
-                
-                with st.spinner("Fetching attendance data and processing reports..."):
-                    try:
-                        all_attendance_records = read_attendance_sheet(attendance_sheet)
-                        if not all_attendance_records:
-                             st.warning("No attendance records found in the temporary log.")
-                             st.stop() 
+                df_attendance = get_attendance_from_gold(
+                    start_date=start_date,
+                    end_date=end_date,
+                    total_working_days=total_working_days
+                )
 
-                        df_attendance = pd.DataFrame(all_attendance_records)
-                        
-                        if 'Date' not in df_attendance.columns:
-                             st.error("Attendance log sheet is missing the 'Date' column.")
-                             st.stop()
-                        df_attendance['Date'] = pd.to_datetime(df_attendance['Date'], errors='coerce').dt.date
-                        df_attendance.dropna(subset=['Date'], inplace=True) 
+                if df_attendance.empty:
+                    st.warning("No attendance data found.")
+                    return
 
 
 
-#------------------------------------ONLY RETRIVE THOSE DEPARTMENT THOSE ARE SELECTED-------------------------------
-                        
-                        
-                        
-                        df_filtered = df_attendance[
-                            (df_attendance['Date'] >= start_date) &
-                            (df_attendance['Date'] <= end_date)
-                        ].copy()
-
-                        if df_filtered.empty:
-                            st.warning(f"No attendance records found between {start_date} and {end_date}.")
-                            st.stop() 
-                            
-                            
-                            
-                      
-# --------------------- CALL THE FUNCTION THAT CALCULATE THE PERCENTAGE OF ATTENDENCE AND SEND MAIL --------------------
-
-
-                      
-                        success_count, fail_count = generate_and_send_reports(
-                            attendance_df=df_filtered,
-                            selected_departments_info=selected_departments_info,
-                            total_working_days=total_working_days,
-                            start_date=start_date,
-                            end_date=end_date
-                        )
-                        
-                        
-# --------------------------------------------------------------------------------------------------------------------
+                # ---------------- FILTER DEPARTMENTS ----------------
 
 
 
-                        if success_count > 0:
-                            st.success(f"Successfully generated and attempted sending reports for {success_count} departments.")
-                        if fail_count > 0:
-                             st.warning(f"Failed to process or send reports for {fail_count} departments. Check logs or HOD emails.")
 
-                    except Exception as e:
-                        st.error(f"An error occurred during report processing: {e}")
+                selected_ids = [str(d["dep_id"]) for d in selected_departments_info]
+
+                df_filtered = df_attendance[
+                    df_attendance["department_id"].astype(str).isin(selected_ids)
+                ].copy()
+
+                if df_filtered.empty:
+                    st.warning("No data for selected departments.")
+                    return
+
+                # ---------------- GENERATE REPORT ----------------
 
 
 
-    # --------------------------------------------- Back Button ---------------------------------------
-    
-    
+
+                success_count, fail_count = generate_and_send_reports(
+                    attendance_df=df_filtered,
+                    selected_departments_info=selected_departments_info,
+                    total_working_days=total_working_days,
+                    start_date=start_date,
+                    end_date=end_date
+                )
+
+                if success_count > 0:
+                    st.success(f" Reports sent for {success_count} departments")
+
+                if fail_count > 0:
+                    st.warning(f" Failed for {fail_count} departments")
+
+            except Exception as e:
+                st.error(f"Error: {e}")
+
+
+
+    # ---------------- BACK BUTTON ----------------
+
+
+
     st.markdown("---")
-    if st.button("⬅️ Back to Admin Menu", key="back_admin_btn"):
+
+    if st.button("⬅️ Back to Admin Panel"):
         go_to("Admin_option")
         st.rerun()

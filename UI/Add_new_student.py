@@ -109,7 +109,12 @@ def add_new_students():
                     st.error("Failed to clear the temporary sheet. Please check manually.")
                 
             except Exception as e:
-                st.error(f"Failed to upload to database: {e}")
+                error_text = str(e)
+                if "JWT expired" in error_text:
+                    st.error("Failed to upload to database: your Supabase session (JWT) has expired.")
+                    st.info("Please log out and log back in, then try the upload again.")
+                else:
+                    st.error(f"Failed to upload to database: {e}")
                 st.warning("Data has NOT been cleared from the sheet.")
     
 

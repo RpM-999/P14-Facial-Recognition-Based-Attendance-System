@@ -1,107 +1,186 @@
 import streamlit as st
 import pandas as pd
-from .RDB_connection_OP import supabase 
-from .student_OP import get_students_by_department 
-from FUNC.send_email import send_report_email 
 import datetime
+from databricks import sql
 
-def generate_and_send_reports(attendance_df: pd.DataFrame, selected_departments_info: list, total_working_days: int, start_date: datetime.date, end_date: datetime.date):
-    
+from .student_OP import get_students_by_department
+from FUNC.send_email import send_report_email
+
+
+# ----------------------------------- SQL Query Run on Databricks----------------
+
+# -------------------------- Fetch attendence data ---------------------------
+
+
+def get_attendance_from_gold(start_date, end_date, total_working_days):
+
+    query = f"""
+    SELECT 
+        department_id,
+        student_id,
+        COUNT(*) AS present_days,
+        ROUND(COUNT(*) * 100.0 / {total_working_days}, 2) AS attendance_percentage
+    FROM college_dw.gold.fact_attendance
+    WHERE attendance_date BETWEEN '{start_date}' AND '{end_date}'
+    GROUP BY department_id, student_id
+    """
+
+    with sql.connect(
+        server_hostname=st.secrets["databricks"]["host"].replace("https://", ""),
+        http_path=st.secrets["databricks"]["http_path"],
+        access_token=st.secrets["databricks"]["token"]
+    ) as conn:
+
+        df = pd.read_sql(query, conn)
+
+    return df
+
+
+
+
+# ------------------------ GENERATE + SEND REPORTS --------------------------
+
+
+
+
+def generate_and_send_reports(attendance_df: pd.DataFrame,
+                             selected_departments_info: list,
+                             total_working_days: int,
+                             start_date: datetime.date,
+                             end_date: datetime.date):
+
     success_count = 0
     fail_count = 0
-    month_year_str = start_date.strftime("%B-%Y") 
-    
-    
-    print("\n--- DEBUG: generate_and_send_reports ---") # DEBUG
-    print(f"Date Range: {start_date} to {end_date}") # DEBUG
-    print(f"Total Working Days: {total_working_days}") # DEBUG
-    print(f"Received Attendance DataFrame (dtype='{attendance_df['Date'].dtype if 'Date' in attendance_df else 'N/A'}', first 5 rows):") # DEBUG
-    print(attendance_df.head()) # DEBUG
+
+    month_year_str = start_date.strftime("%B-%Y")
 
     if total_working_days <= 0:
-        st.warning("Cannot generate percentage report as Total Working Days is zero or less.")
-        return 0, len(selected_departments_info) 
+        st.warning("Total Working Days is zero. Cannot calculate attendance.")
+        return 0, len(selected_departments_info)
 
     for dept_info in selected_departments_info:
+
         dept_id = dept_info.get('dep_id')
         dept_name = dept_info.get('dep_name', 'Unknown Department')
         hod_email = dept_info.get('dep_hod_mail')
-        print(f"\nProcessing Dept: {dept_name} (ID: {dept_id}, Type: {type(dept_id)})") # DEBUG
 
         if not hod_email:
-            st.warning(f"Skipping department '{dept_name}': HOD email missing.")
+            st.warning(f"Skipping {dept_name}: No HOD email")
             fail_count += 1
             continue
 
-        st.write(f"Processing report for: {dept_name}...")
+        st.write(f"📊 Processing report for: {dept_name}")
 
         try:
-            students_in_dept = get_students_by_department(dept_id)
-            if not students_in_dept:
-                st.write(f"- No students found registered in {dept_name}.")
-                continue 
 
-            df_roster = pd.DataFrame(students_in_dept) 
-            print(f"- Fetched Roster (first 5):\n{df_roster.head()}") # DEBUG
-            df_dept_attendance = attendance_df[attendance_df['dep_id'].astype('str') == str(dept_id)].copy()
-
-            if not df_dept_attendance.empty:
-                attendance_counts = df_dept_attendance.groupby('S_id')['Date'].nunique().reset_index(name='days_present')
-                print(f"- Attendance Counts (nunique dates):\n{attendance_counts}") # DEBUG
-            else:
-                attendance_counts = pd.DataFrame(columns=['S_id', 'days_present'])
-                st.write(f"- No attendance records found for {dept_name} in this period.")
-                print("- No attendance records found for this dept in this period.") # DEBUG
+# ----------------------------------- FETCH STUDENTS ----------------------
 
 
-            df_report = pd.merge(df_roster, attendance_counts, on='S_id', how='left')
-            df_report['days_present'].fillna(0, inplace=True)
-            df_report['days_present'] = df_report['days_present'].astype(int) 
-            print(f"- Report DF after merge (check days_present):\n{df_report.head()}") # DEBUG
 
-            if total_working_days > 0:
-                 df_report['attendance_percentage'] = (df_report['days_present'] / total_working_days) * 100
-                 df_report['attendance_percentage'] = df_report['attendance_percentage'].round(2) # Round to 2 decimal places
-            else:
-                 df_report['attendance_percentage'] = 0.0
+            students = get_students_by_department(dept_id)
 
-            df_final_report = pd.DataFrame({
-                'Month-Year': month_year_str,
-                'Student ID': df_report['S_id'],
-                'Student Name': df_report['S_name'], 
-                'Department ID': dept_id,
-                'Days Present': df_report['days_present'],
-                'Attendance %': df_report['attendance_percentage']
+            if not students:
+                st.info(f"No students found in {dept_name}")
+                continue
+
+            df_roster = pd.DataFrame(students)
+
+
+# ------------------------- FILTER DATA ---------------------------------
+
+
+
+            df_dept = attendance_df[
+                attendance_df["department_id"].astype(str) == str(dept_id)
+            ].copy()
+
+
+# --------------------------- SELECT REQUIRED COLUMNS ---------------------
+
+
+            df_counts = df_dept[[
+                "student_id",
+                "present_days",
+                "attendance_percentage"
+            ]].copy()
+
+
+# ------------------------------ MERGE WITH STUDENT ROSTER ---------------------
+
+
+            df_report = pd.merge(
+                df_roster,
+                df_counts,
+                left_on="S_id",
+                right_on="student_id",
+                how="left"
+            )
+
+# ---------------------------- HANDLE NULLS ---------------------------
+
+
+            df_report["present_days"].fillna(0, inplace=True)
+            df_report["attendance_percentage"].fillna(0, inplace=True)
+
+            df_report["present_days"] = df_report["present_days"].astype(int)
+            df_report["attendance_percentage"] = df_report["attendance_percentage"].round(2)
+
+
+
+# -------------------------- FINAL REPORT FORMAT ---------------------
+
+
+
+            df_final = pd.DataFrame({
+                "Month-Year": month_year_str,
+                "Student ID": df_report["S_id"],
+                "Student Name": df_report["S_name"],
+                "Department ID": dept_id,
+                "Days Present": df_report["present_days"],
+                "Attendance %": df_report["attendance_percentage"]
             })
-            
-            
-            df_final_report.sort_values(by='Student Name', inplace=True)
 
-            report_html = df_final_report.to_html(index=False, border=1, classes='dataframe table table-striped table-hover', justify='center')
+            df_final.sort_values(by="Student Name", inplace=True)
+
+
+# ------------------------- CONVERT TO HTML -------------------------
+
+
+            report_html = df_final.to_html(index=False)
+
             email_body = f"""
-            <html><body>
-            <h2>Attendance Report for {dept_name}</h2>
-            <p><strong>Period:</strong> {start_date.strftime('%d %b %Y')} to {end_date.strftime('%d %b %Y')}</p>
-            <p><strong>Total Working Days in Period:</strong> {total_working_days}</p>
-            <hr>
-            {report_html}
-            <hr>
-            <p><em>Generated by the Automated Attendance System.</em></p>
-            </body></html>
+            <html>
+            <body>
+                <h2>Attendance Report - {dept_name}</h2>
+                <p><b>Period:</b> {start_date.strftime('%d %b %Y')} to {end_date.strftime('%d %b %Y')}</p>
+                <p><b>Total Working Days:</b> {total_working_days}</p>
+                <hr>
+                {report_html}
+                <hr>
+                <p><i>Generated by Attendance System</i></p>
+            </body>
+            </html>
             """
+
             subject = f"Attendance Report: {dept_name} ({month_year_str})"
 
-            email_sent, email_msg = send_report_email(hod_email, subject, email_body)
 
-            if email_sent:
-                st.write(f"- Report sent successfully to {hod_email}")
+
+# ----------------------------- SEND EMAIL ------------------------
+
+
+
+            sent, msg = send_report_email(hod_email, subject, email_body)
+
+            if sent:
+                st.success(f" Report sent to {hod_email}")
                 success_count += 1
             else:
-                st.warning(f"- Failed to send report for {dept_name} to {hod_email}: {email_msg}")
+                st.error(f" Failed for {dept_name}: {msg}")
                 fail_count += 1
 
         except Exception as e:
-            st.error(f"Error processing report for {dept_name}: {e}")
+            st.error(f"Error processing {dept_name}: {e}")
             fail_count += 1
 
     return success_count, fail_count

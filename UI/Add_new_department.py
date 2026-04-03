@@ -29,17 +29,19 @@ def Add_new_department_page():
 
 
         if submitted:
-            # --- Validation ---
+
+            # --------------------------- NEED TO FILL ALL FIELDS -------------------------
+
+
             if not all([d_id, d_name, d_hod_name, d_hod_email]):
                 st.warning("Please fill out all fields.")
             else:
                 try:
                     
                     add_department( dep_id=d_id ,dep_name=d_name,dep_hod=d_hod_name,dep_hod_mail=d_hod_email)
-                    st.success(f"✅ Successfully added department: {d_name}")
+                    st.success(f" Successfully added department: {d_name}")
                     
-                except Exception as e:
-                    # This will catch potential errors like a duplicate department ID
+                except Exception as e:                   
                     st.error(f"An error occurred: {e}")
 
 

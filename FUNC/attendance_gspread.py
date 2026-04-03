@@ -9,7 +9,7 @@ import json
 
 
 
-SHEET_NAME = "Student Attendance"
+SHEET_NAME = "STUDENT ATTENDANCE"
 
 
 @st.cache_resource(ttl=60) 

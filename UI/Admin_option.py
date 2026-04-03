@@ -1,6 +1,7 @@
 import streamlit as st
 from FUNC.navigation import go_to
 
+
 def admin_options_page():
    
     
@@ -66,8 +67,44 @@ def admin_options_page():
         
         st.divider()
             
-            
-# -------------------------- Admin Management ---------------------------------------------
+
+
+# ---------------------------------------------------- Databricks Job Management -------------------------------------
+
+        st.subheader("Databricks Job Management")
+
+# ---job------------- Student ----------------
+
+        if st.button("Upload Student Data", use_container_width=True,key="student_btn"):
+            st.session_state.job_type = "student"
+            go_to("Job_monitor")
+
+# ---job------------- Department ----------------
+
+        if st.button("Upload Department Data", use_container_width=True,key="department_btn"):
+            st.session_state.job_type = "department"
+            go_to("Job_monitor")
+
+
+# ---------------- Attendance ----------------
+
+
+        if st.button("Upload Attendance Data", use_container_width=True,key="attendance_btn"):
+            st.session_state.job_type = "attendance"
+            go_to("Job_monitor")
+
+
+
+# ---------------- Full Pipeline ----------------
+
+        if st.button("Upload All Data", use_container_width=True,key="full_btn"):
+            st.session_state.job_type = "full"
+            go_to("Job_monitor")
+
+
+        st.divider()
+
+# --------------------------------------- Admin Management ---------------------------------------
 
 
     
@@ -79,7 +116,9 @@ def admin_options_page():
             # Clear relevant session state keys on logout
             st.session_state.logged_in = False
             st.session_state.admin_name = None
-            # Redirect to the home page after logout
+
+            # ----------------------Redirect to the home page after logout---------------------------
+
             go_to("Home") 
             
             
@@ -92,11 +131,11 @@ def admin_options_page():
     
     st.title("Admin Panel")
     st.info("Select an option from the sidebar to get started.")
-    # Corrected the parameter from use_column_width to use_container_width
     st.image(
-        "IMAGES/img.png",
+        "IMAGES/admin panel image.png",
         caption="Welcome to the Admin Control Panel",
-        width='stretch' 
+        width='stretch'
+
     )
 
 

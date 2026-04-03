@@ -1,8 +1,9 @@
 import streamlit as st
+
 from UI import Home, Admin_login, Admin_option, Add_new_department ,Update_department_info 
-from UI import Add_new_student ,Update_student_info , Remove_student , Give_attendance
+from UI import Add_new_student ,Update_student_info , Remove_student 
 from UI import Attendance_list
-from UI import Add_admin , Remove_admin
+from UI import Job_monitor
 
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Home"
@@ -113,9 +114,16 @@ elif page == "Remove_admin":
 
 
 
-#-----------------------------------------------------------------------------------------------------
+#------------------------------------------- ADMIN / JOB MONITORING ----------------------------------------------------------
 
 
+
+elif page == "Job_monitor":
+    if st.session_state.logged_in:
+        Job_monitor.job_monitor_page()
+    else:
+        st.warning(" Please log in to access this page.")
+        Admin_login.login_page()
 
 
 

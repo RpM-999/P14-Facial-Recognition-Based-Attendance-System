@@ -85,7 +85,6 @@ def remove_student():
     
     st.markdown("---")
     if st.button("⬅️ Back to Admin Menu"):
-        # Clear state if necessary before leaving
         if "student_to_remove" in st.session_state:
             del st.session_state.student_to_remove
         go_to("Admin_option")

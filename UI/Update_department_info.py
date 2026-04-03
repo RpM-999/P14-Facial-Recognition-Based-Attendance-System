@@ -67,8 +67,8 @@ def update_department_info_page():
 
                     update_department(dep_id=selected_dept['dep_id'], dep_name=new_dep_name,dep_hod=new_dep_hod,dep_hod_mail=new_dep_hod_mail)
                     
-                    st.success("✅ Department updated successfully!")
-                    # We add a rerun here to clear the old state and reload the new data
+                    st.success(" Department updated successfully!")
+                    
                     st.rerun() 
                     
                 except Exception as e:

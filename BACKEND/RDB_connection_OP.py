@@ -5,12 +5,13 @@ if "supabase" in st.session_state:
     supabase = st.session_state.supabase
 else:
     try:
-        url = st.secrets["supabase"]["url"]
-        anon_key = st.secrets["supabase"]["anon_key"]
+        url = st.secrets["supabase_api"]["url"]
+        anon_key = st.secrets["supabase_api"]["anon_key"]
         
         supabase: Client = create_client(url, anon_key)
         
-        # Store the connection in session state
+        # ------------------------ STORE SESSION STATE ----------------------------------------
+
         st.session_state.supabase = supabase
         
     except Exception as e:

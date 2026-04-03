@@ -8,7 +8,6 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 
 @st.cache_resource
-
 def load_models():
     
     mtcnn = MTCNN(
@@ -25,7 +24,9 @@ def load_models():
     
     return mtcnn, resnet
 
-# Load the models once on startup
+# --------------------------- LOAD MODEL ON START -------------------------------
+
+
 mtcnn, resnet = load_models()
 
 

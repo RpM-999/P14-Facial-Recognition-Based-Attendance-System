@@ -1,5 +1,6 @@
 
-
+databricks-sql-connector
+databricks
 streamlit
 facenet-pytorch
 torch

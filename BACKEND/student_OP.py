@@ -21,7 +21,10 @@ def process_and_upload_students(student_records: list):
         
         today_str = datetime.datetime.now().strftime("%y%m%d")
         
+
         # 2. Check Supabase for the last ID used today
+
+
         response = supabase.table("students").select("S_id") \
                              .like("S_id", f"{today_str}-%") \
                              .order("S_id", desc=True) \
@@ -118,6 +121,9 @@ def get_student_by_id(S_id):
         print(f"Error getting student: {e}")
         return None
     
+
+
+    
 def update_student_info(S_id, new_data):
     try:
         supabase.table("students").update(new_data) \
@@ -211,33 +217,30 @@ def delete_student(student_id: str):
 def find_student_by_embedding(live_embedding):
     SIMILARITY_THRESHOLD = 0.75
     try:
-        search_result = qdrant_client.search(
+        search_result = qdrant_client.query_points(
             collection_name=QDRANT_COLLECTION_NAME,
-            query_vector=live_embedding,
-            limit=1,  
-            with_payload=True 
+            query=live_embedding,   
+            limit=1,
+            with_payload=True
         )
 
-        if not search_result:
+        # New API returns object → use .points
+        if not search_result or not search_result.points:
             return None, "No similar faces found in the database."
 
-        # Get the best match (the first result)
-        best_match = search_result[0]
-        score = best_match.score 
-        payload = best_match.payload 
+        best_match = search_result.points[0]
+        score = best_match.score
+        payload = best_match.payload
 
         if 'S_id' not in payload:
-             return None, "Database Error: Matched face data is incomplete."
+            return None, "Database Error: Matched face data is incomplete."
 
         student_id = payload['S_id']
 
-        # Compare the score against the threshold
         if score >= SIMILARITY_THRESHOLD:
-            # Confident match found
-            print(f"Match found: {student_id} with score {score:.4f}") 
+            print(f"Match found: {student_id} with score {score:.4f}")
             return student_id, f"Match found (Score: {score:.2f})"
         else:
-            
             return None, f"Recognition uncertain. (Closest match score {score:.2f} below threshold {SIMILARITY_THRESHOLD})"
 
     except Exception as e:
@@ -245,8 +248,9 @@ def find_student_by_embedding(live_embedding):
 
 
 
-
 #-------------------------------STUDENT LIST BASED ON SELECTED DEPARTMENT ---------------------------------
+
+
 
 def get_students_by_department(department_id: str):
     try:

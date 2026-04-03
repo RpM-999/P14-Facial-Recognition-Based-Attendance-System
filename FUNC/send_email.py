@@ -92,7 +92,11 @@ def send_report_email(recipient_email: str, subject: str, body_html: str):
         if not recipient_email:
             return False, "Missing recipient email address for report."
 
-        # --- Construct Email ---
+
+        # ----------------------------- Construct Email ---------------------------
+
+        
+
         message = MIMEMultipart("alternative")
         message["Subject"] = subject
         message["From"] = f"Attendance System <{sender_email}>" 
