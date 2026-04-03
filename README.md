@@ -25,7 +25,7 @@ The **Facial Recognition Based Attendance System** is an automated solution desi
 ## ✨ Features
 
 
-|**Admin Access Control**|
+**Admin Access Control**
 
  <p align="center">
   <img src="IMAGES/00 DIAGRAM/03 ADMIN ACESS CONTROL.png" width="900">
@@ -81,7 +81,58 @@ The **Facial Recognition Based Attendance System** is an automated solution desi
 
 ## **🛠 Technology Stack**
 
-### Platform Used in this Project
+### **Platform Used in this Project**
+
+
+#### 🔹 1. Application Layer (Frontend)
+
+- **Admin Control Panel**
+  - Manage departments, students, and registration settings  
+- **Student Registration Panel**
+  - Students register their details  
+- **Technology:** Streamlit Cloud  
+
+---
+
+#### 🔹 2. Attendance System
+
+- **Attendance Panel**
+  - Captures student attendance (e.g., face recognition)  
+- Runs on **Local Machine**
+  - Handles real-time processing  
+
+---
+
+#### 🔹 3. Transactional Database (OLTP)
+
+- Stores real-time operational data:
+  - Students  
+  - Departments  
+  - Attendance logs  
+- **Technology:** Supabase (PostgreSQL)  
+
+---
+
+#### 🔹 4. Data Warehouse (OLAP)
+
+- Data is moved from OLTP → Data Warehouse using ELT  
+- Structured into **Star Schema**:
+  - Dim_Student  
+  - Dim_Department  
+  - Fact_Attendance  
+- **Technology:** Databricks (Delta Lake)  
+
+---
+
+#### 🔹 5. Analytics Layer
+
+- Data is visualized in dashboards:
+  - Attendance KPIs  
+  - Trends & insights  
+- **Technology:** Tableau  
+
+---
+
 <p align="center">
   <img src="IMAGES/00 DIAGRAM/00 PLATFORM USED IN THIS PROJECT.png" width="900">
 </p>
@@ -177,6 +228,11 @@ Student Attendance Page
 ✓ Log to Google Sheets (Real-time) → Atomic timestamp record
 ```
 
+**3. Attendance Marking High Level Overview :** 
+
+<p align="center">
+  <img src="IMAGES/00 DIAGRAM/06 GENERATION OF ATTENDENCE LIST.png" width="900">
+</p>
 
 
 #### **3. Report Generation & Distribution Pipeline**
@@ -198,11 +254,7 @@ Admin Triggers Report Generation
    Send via SMTP → Department HODs
 ```
 
-**Report Generation Flow**
 
-<p align="center">
-  <img src="IMAGES/00 DIAGRAM/02 GIVING ATTENDANCE PROCESS.png" width="900">
-</p>
 
 ### Database Architecture
 
@@ -717,7 +769,7 @@ Create two Google Sheets:
 ```
 
 <p align="center">
-  <img src="IMAGES/01 WEBSITE IMAGES/" width="900">
+  <img src="IMAGES/01 WEBSITE IMAGES/17 STUDENT DETAILS ON GOOGLE SHEET.png" width="900">
 </p>
 
 **Sheet 2: Attendance Log** (`STUDENT ATTENDANCE`)
@@ -1151,7 +1203,7 @@ Password: ••••••••
 **Report Email to HOD**
 
 <p align="center">
-  <img src="IMAGES/01 WEBSITE IMAGES/16 ATTENDANCE MAIl TO HOD.png" width="900">
+  <img src="IMAGES/01 WEBSITE IMAGES/16 ATTENDANCE MAIL TO HOD.png" width="900">
 </p>
 
 ### Student Attendance Workflow
@@ -1249,17 +1301,113 @@ Success Message
   <img src="IMAGES/00 DIAGRAM/11 FACE EMBEDDING ARCHITECTURE.png" width="900">
 </p>
 
+```
+ Face Recognition Pipeline
+
+1. Input Image
+   - System takes an image as input.
+
+2. Preprocessing & Face Detection
+   - Image is resized and converted into an image pyramid.
+   - Candidate face regions are detected.
+   - Overlapping boxes are removed (Non-Max Suppression).
+   - Final face bounding box is selected.
+   - 5 facial landmarks are detected (eyes, nose, mouth).
+
+3. Feature Extraction (CNN)
+   - Image is resized to **160 × 160**.
+   - Early layers detect basic features (edges, gradients).
+   - Inception blocks capture multi-scale features (eyes, nose, face shape).
+   - Residual blocks help prevent vanishing gradient.
+   - Late layers extract high-level facial features.
+
+4. Embedding Generation
+   - Model generates a **512-dimensional embedding vector**.
+   - This vector uniquely represents a face.
+
+5. Face Recognition
+   - Embeddings are compared using distance metrics.
+   - Similar embeddings → same person.
+   - Different embeddings → different person.
+```
 #### **MTCNN Workflow**
 
 <p align="center">
   <img src="IMAGES/00 DIAGRAM/12 MTCNN WORKFLOW.png" width="900">
 </p>
 
+```
+MTCNN detects faces using a 3-stage cascaded network:
+
+1. P-Net (Proposal Network)
+   - Input: Image at multiple scales (~12×12)
+   - Quickly scans the image to generate **candidate bounding boxes**
+   - Filters obvious non-face regions
+
+2. R-Net (Refine Network)
+   - Input: Cropped regions (~24×24)
+   - Refines the candidate boxes
+   - Removes false positives and improves accuracy
+
+3. O-Net (Output Network)
+   - Input: Refined regions (~48×48)
+   - Produces final **face bounding boxes**
+   - Detects **5 facial landmarks** (eyes, nose, mouth)
+
+-------------> Output <-------------------
+
+- Final face bounding boxes
+- 5 facial landmark points
+```
+
 #### *MTCNN Architecture*
 
 <p align="center">
   <img src="IMAGES/00 DIAGRAM/13 MTCNN ARCHITECTURE.png" width="900">
 </p>
+
+```
+ MTCNN Network Architecture
+
+MTCNN uses three CNNs with increasing complexity:
+
+1. P-Net (Proposal Network)
+- Input: (12 × 12 × 3)
+- Layers: Convolution + Max Pooling
+- Output:
+  - Face classification (face / non-face)
+  - Bounding box regression
+  - Facial landmark prediction
+- Purpose: Quickly generate candidate face regions
+
+---
+
+2. R-Net (Refine Network)
+- Input: (24 × 24 × 3)
+- Layers: Deeper CNN + Fully Connected layer
+- Output:
+  - Refined face classification
+  - Improved bounding box
+  - Facial landmarks
+- Purpose: Remove false positives and refine detection
+
+---
+
+ 3. O-Net (Output Network)
+- Input: (48 × 48 × 3)
+- Layers: Deeper CNN + Fully Connected layer
+- Output:
+  - Final face classification
+  - Accurate bounding boxes
+  - 5 facial landmarks (eyes, nose, mouth)
+- Purpose: Final precise face detection
+
+---
+
+Pipeline Flow
+Original Image → P-Net → R-Net → O-Net → Face + Landmarks → Resize to (160 × 160 × 3) (for recognition)
+
+```
 
 #### *Example*
 
@@ -1274,6 +1422,44 @@ Success Message
   <img src="IMAGES/00 DIAGRAM/15 VGGFACE2.png" width="900">
 </p>
 
+```
+Face Embedding using VGGFace-2
+
+After detecting and aligning the face, the image is resized to (160 × 160 × 3) and passed into a pretrained deep learning model (VGGFace-2).
+
+Feature Extraction Process
+
+1. Early Layers
+   - Detect low-level features like edges and gradients
+
+2. Inception Block
+   - Captures multi-scale features:
+     - Small features → eyes
+     - Medium features → nose
+     - Large features → face shape
+
+3. Residual Block
+   - Helps in training deep networks by avoiding vanishing gradient problem
+
+4. Late Layers
+   - Extract high-level facial features:
+     - Distance between eyes
+     - Nose width
+     - Jawline structure
+
+---
+
+Output
+- Generates a 512-dimensional embedding vector
+- This vector uniquely represents a face
+
+---
+
+Usage
+- Compare embeddings using distance (Euclidean / cosine)
+- Similar vectors → same person
+- Different vectors → different person
+```
 
 
 ### Data Pipeline Workflow (Background)
@@ -1604,6 +1790,57 @@ Result: Student 260401-0001 (confidence: 0.89)
 <img src="IMAGES/00 DIAGRAM/04 MOVE DAT FROM TDB TO DWH.png" width="900">
 </p>
 
+```
+1. Data Sources
+
+- Admin Panel
+  - Students_Table
+  - Department_Table
+  - Registration Status (Is_Registration_Open)
+- Google Sheets
+  - Attendance data (daily records)
+
+---
+
+2. ELT Processing (Databricks)
+
+- Data is loaded into Databricks and transformed using ELT pipelines
+- Separate pipelines for:
+  - Student data → Dim_Student
+  - Department data → Dim_Department
+  - Attendance data → Fact_Attendance
+
+---
+
+3. Data Modeling (Star Schema)
+
+- Dimension Tables (SCD Type-2)
+  - Dim_Student
+  - Dim_Department
+- Fact Table
+  - Fact_Attendance (partitioned by attendance_date)
+
+- Relationships:
+  - Fact_Attendance ↔ Dim_Student
+  - Fact_Attendance ↔ Dim_Department
+
+---
+
+4. Data Consumption (BI Layer)
+
+- Data is visualized in dashboards:
+  - Dashboard-1 → KPIs (Total Students, Attendance %)
+  - Dashboard-2 → Trends & department analysis
+  - Dashboard-3 → Student-level insights
+  - Dashboard- → Student admission rate 
+
+---
+
+Pipeline Flow :: Admin / Google Sheets → ELT (Databricks) → Star Schema → Dashboards
+
+---
+```
+
 ### *2. Student Schema Through ETL Pipeline*
 
 
@@ -1611,6 +1848,46 @@ Result: Student 260401-0001 (confidence: 0.89)
 <img src="IMAGES/00 DIAGRAM/08 PIPELINE -STUDENT.png" width="900">
 </p>
 
+```
+This pipeline transforms raw student data into a clean, structured SCD Type-2 dimension table.
+
+---
+
+1. Extract (Raw Layer / Bronze)
+
+- Source data is ingested into Databricks (CSV / API / DB)
+- Raw schema contains inconsistent column names:
+  - S_id, S_name, S_mail, S_phone, S_Address, dep_id, etc.
+- Stored as **Bronze Table**
+
+---
+
+2. Transform (Clean Layer / Silver)
+
+- Standardize column names:
+  - S_id → student_id
+  - S_name → student_name
+  - S_mail → student_email
+- Data cleaning:
+  - Remove nulls / duplicates
+  - Format data types (date, int, string)
+- Output: Clean structured dataset
+
+---
+
+3. Load (Business Layer / Gold)
+
+- Load into DIM_STUDENTS table
+- Apply SCD Type-2 logic:
+  - Add: start_date, end_date, is_current
+  - Track historical changes (address, phone, etc.)
+
+---
+
+Pipeline Flow :: Raw Data (Bronze) → Clean Data (Silver) → Dimension Table (Gold)
+
+
+```
 
 ### *3. Department Schema Through ETL Pipeline*
 
@@ -1620,6 +1897,47 @@ Result: Student 260401-0001 (confidence: 0.89)
 </p>
 
 
+```
+This pipeline transforms raw department data into a structured SCD Type-2 dimension table.
+
+---
+
+1. Extract (Bronze Layer)
+
+- Raw data is ingested into Databricks
+- Contains inconsistent column names:
+  - dep_id, dep_name, dep_hod, dep_hod_mail
+- Stored as Bronze Table (raw format)
+
+---
+
+2. Transform (Silver Layer)
+
+- Standardize column names:
+  - dep_id → department_id
+  - dep_name → department_name
+  - dep_hod → hod_name
+  - dep_hod_mail → hod_email
+- Data cleaning:
+  - Handle null values
+  - Ensure correct data types
+- Output: Clean structured dataset
+
+---
+
+3. Load (Gold Layer)
+
+- Load into **DIM_DEPARTMENTS**
+- Apply **SCD Type-2 logic**:
+  - Add: start_date, end_date, is_current
+  - Track changes (e.g., HOD updates)
+
+---
+
+Pipeline Flow :: Raw Data (Bronze) → Clean Data (Silver) → Dimension Table (Gold)
+
+```
+
 ### *4. Attendance Schema Through ETL Pipeline*
 
 
@@ -1627,6 +1945,49 @@ Result: Student 260401-0001 (confidence: 0.89)
 <img src="IMAGES/00 DIAGRAM/10 PIPELINE ATTENDANCE.png" width="900">
 </p>
 
+```
+This pipeline processes raw attendance data and loads it into a partitioned fact table.
+
+---
+
+1. Extract (Bronze Layer)
+
+- Data source: Google Sheets
+- Raw schema:
+  - DATE, STUDENT_ID, DEPARTMENT_ID, ingestion_time
+- Issues:
+  - Inconsistent column naming (uppercase)
+  - DATE stored as string
+- Stored as Bronze Table
+
+---
+
+2. Transform (Silver Layer)
+
+- Standardize column names:
+  - DATE → attendance_date
+  - STUDENT_ID → student_id
+  - DEPARTMENT_ID → department_id
+- Data cleaning:
+  - Convert DATE → `date` type
+  - Ensure proper schema
+- Output: Clean structured dataset
+
+---
+
+3. Load (Gold Layer)
+- Load into FACT_ATTENDANCE
+- Add partitioning:
+  - Partition by `attendance_date`
+- Final schema:
+  - attendance_date, student_id, department_id, ingestion_time
+
+---
+
+Pipeline Flow :: Google Sheets → Bronze → Silver → Fact Table (Gold)
+
+---
+```
 
 ### *Scheduling of the ETL jobs*
 
@@ -2559,7 +2920,7 @@ print(supabase.table('students').select('*').limit(1).execute())"
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│           STUDENT REGISTRATION DETAILED WORKFLOW                     │
+│           STUDENT REGISTRATION DETAILED WORKFLOW            │
 └─────────────────────────────────────────────────────────────┘
 
 STEP 1: Admin Opens Registration
@@ -2758,7 +3119,7 @@ COMPLETION
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│          ATTENDANCE REPORT DETAILED WORKFLOW                         │
+│          ATTENDANCE REPORT DETAILED WORKFLOW                │
 └─────────────────────────────────────────────────────────────┘
 
 STEP 1: Admin Initiates Report
@@ -2993,9 +3354,9 @@ See the Security section above for detailed recommendations.
 
 ---
 
-**Last Updated**: April 3, 2026
-**Project Status**: ✅ Active Development & Production Ready
-**License**: MIT
-**Python Version**: 3.8+
-**Author**: Rupam Mondal (@RpM-999)
+- **Last Updated**: April 3, 2026
+- **Project Status**: ✅ Active Development & Production Ready
+- **License**: MIT
+- **Python Version**: 3.8+
+- **Author**: Rupam Mondal (@RpM-999)
 
