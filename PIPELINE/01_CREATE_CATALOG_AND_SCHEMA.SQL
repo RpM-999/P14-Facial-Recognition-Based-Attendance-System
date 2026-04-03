@@ -1,0 +1,10 @@
+
+-- CREATE CATALOG IF NOT EXISTS college_dw;
+
+CREATE CATALOG IF NOT EXISTS college_dw;
+
+-- CREATE SCHEMAS
+
+CREATE SCHEMA IF NOT EXISTS college_dw.bronze;
+CREATE SCHEMA IF NOT EXISTS college_dw.silver;
+CREATE SCHEMA IF NOT EXISTS college_dw.gold;
