@@ -19,6 +19,6 @@ def admin_verification(email: str, password: str, supabase: Client):
 
     except AuthApiError as e:
         # Give a clearer error message from Supabase
-        return False, f"⚠️ {e.message}"
+        return False, f" {e.message}"
     except Exception as e:
-        return False, f"⚠️ An unexpected error occurred: {e}"
+        return False, f" An unexpected error occurred: {e}"
